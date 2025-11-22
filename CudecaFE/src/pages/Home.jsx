@@ -76,93 +76,135 @@ const mockEvents = [
 ];
 
 const Home = () => {
-  const [filterType, setFilterType] = useState('all');
-
-  const eventTypes = [
-    { value: 'all', label: 'Todos los Eventos' },
-    { value: 'cena', label: 'Cenas' },
-    { value: 'concierto', label: 'Conciertos' },
-    { value: 'marcha', label: 'Marchas' },
-    { value: 'rifa', label: 'Rifas' },
-  ];
-
-  // TODO: Obtener eventos filtrados de la API
-  const filteredEvents = filterType === 'all'
-    ? mockEvents
-    : mockEvents.filter(event => event.type === filterType);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-cudeca-yellow to-cudeca-green py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="relative py-20 px-4 overflow-hidden" style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=1600&h=600&fit=crop)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}>
+        <div className="absolute inset-0 bg-cudeca-darkGreen opacity-80"></div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Sparkles className="w-16 h-16 mx-auto mb-6 text-gray-900" aria-hidden="true" />
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Eventos Solidarios Cudeca
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              EVENTOS SOLIDARIOS QUE<br />MARCAN LA DIFERENCIA
             </h1>
-            <p className="text-xl md:text-2xl text-gray-800 max-w-3xl mx-auto mb-8">
+            <p className="text-lg md:text-xl text-white max-w-3xl mx-auto mb-8 drop-shadow-lg">
               Participa en nuestros eventos y ayúdanos a seguir ofreciendo cuidados paliativos gratuitos a quienes más lo necesitan.
             </p>
             <a
               href="#events"
-              className="inline-block bg-gray-900 text-white font-bold py-4 px-8 rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-lg focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2"
+              className="inline-block bg-cudeca-green text-white font-bold py-4 px-10 rounded-lg hover:bg-cudeca-mediumGreen transition-all duration-200 shadow-2xl hover:shadow-xl text-xl focus:outline-none focus:ring-4 focus:ring-cudeca-green focus:ring-offset-2"
             >
-              Ver Eventos Disponibles
+              Próximos Eventos
             </a>
           </motion.div>
         </div>
       </section>
 
-      {/* Progreso de recaudación */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <GoalProgress current={6500} goal={10000} eventTitle="Todos los Eventos" />
-      </section>
+      {/* Sección de Eventos y Recaudación */}
+      <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Columna Izquierda - Próximos Eventos (2/3) */}
+          <div className="lg:col-span-2">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <h2 className="text-4xl font-bold text-gray-900 mb-8">
+                Próximos Eventos
+              </h2>
+              
+              {/* Grid de eventos destacados */}
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                {mockEvents.slice(0, 4).map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
 
-      {/* Filtros y eventos */}
-      <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">
-            Próximos Eventos
-          </h2>
-          
-          {/* Filtros */}
-          <div className="flex flex-wrap justify-center gap-3" role="group" aria-label="Filtrar eventos por tipo">
-            {eventTypes.map((type) => (
-              <button
-                key={type.value}
-                onClick={() => setFilterType(type.value)}
-                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-all duration-200 ${
-                  filterType === type.value
-                    ? 'bg-cudeca-yellow text-gray-900 shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 shadow'
-                }`}
-                aria-pressed={filterType === type.value}
-              >
-                {type.label}
-              </button>
-            ))}
+              <div className="text-center">
+                <a
+                  href="/eventos"
+                  className="inline-block bg-cudeca-darkGreen text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg focus:outline-none focus:ring-4 focus:ring-cudeca-darkGreen focus:ring-offset-2"
+                >
+                  Ver Todos los Eventos
+                </a>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Columna Derecha - Recaudación (1/3) */}
+          <div className="lg:col-span-1">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="sticky top-24"
+            >
+              {/* Versión compacta de progreso */}
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Objetivo de Recaudación
+                </h3>
+                
+                {/* Estadísticas */}
+                <div className="space-y-4 mb-6">
+                  <div className="bg-cudeca-lightGreen p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Recaudado</p>
+                    <p className="text-3xl font-bold text-cudeca-darkGreen">
+                      6.500 €
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-100 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Objetivo</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      10.000 €
+                    </p>
+                  </div>
+                </div>
+
+                {/* Barra de progreso */}
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Progreso</span>
+                    <span className="font-bold text-cudeca-darkGreen">65%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <motion.div
+                      className="bg-cudeca-mediumGreen h-full rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: '65%' }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Quedan <span className="font-bold text-cudeca-darkGreen">3.500 €</span> para alcanzar el objetivo
+                  </p>
+                </div>
+
+                {/* CTA Donar */}
+                <a
+                  href="/hazte-socio"
+                  className="block w-full text-center bg-cudeca-mediumGreen text-white font-bold py-3 px-6 rounded-lg hover:bg-cudeca-darkGreen transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-cudeca-mediumGreen focus:ring-offset-2"
+                >
+                  Donar Ahora
+                </a>
+
+                <p className="text-sm text-gray-600 mt-4 text-center">
+                  Tu apoyo marca la diferencia
+                </p>
+              </div>
+            </motion.div>
           </div>
         </div>
-
-        {/* Grid de eventos */}
-        {filteredEvents.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-gray-600">
-              No hay eventos disponibles para este filtro.
-            </p>
-          </div>
-        )}
       </section>
 
       {/* Opciones de voluntariado */}

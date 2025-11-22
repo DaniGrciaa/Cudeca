@@ -71,6 +71,50 @@ const mockEvents = [
     image: null,
     availableTickets: 80,
   },
+  {
+    id: 7,
+    title: 'Cena Solidaria de Primavera',
+    description: 'Disfruta de una deliciosa cena con los mejores productos de temporada.',
+    type: 'cena',
+    price: 65.00,
+    date: '5 de Abril, 2026',
+    location: 'Hotel Alay, Benalmádena',
+    image: null,
+    availableTickets: 200,
+  },
+  {
+    id: 8,
+    title: 'Concierto de Rock Solidario',
+    description: 'Las mejores bandas locales de rock se unen por una causa benéfica.',
+    type: 'concierto',
+    price: 30.00,
+    date: '15 de Mayo, 2026',
+    location: 'Sala París 15, Málaga',
+    image: null,
+    availableTickets: 400,
+  },
+  {
+    id: 9,
+    title: 'Marcha Cicloturista Solidaria',
+    description: 'Recorre 50km por la costa en bicicleta. Incluye avituallamiento y medalla.',
+    type: 'marcha',
+    price: 20.00,
+    date: '25 de Mayo, 2026',
+    location: 'Salida: Puerto Deportivo de Benalmádena',
+    image: null,
+    availableTickets: 350,
+  },
+  {
+    id: 10,
+    title: 'Rifa de Verano',
+    description: 'Gana fantásticos premios veraniegos mientras apoyas nuestra causa.',
+    type: 'rifa',
+    price: 3.00,
+    date: 'Sorteo: 15 de Junio, 2026',
+    location: 'Online',
+    image: null,
+    availableTickets: 2000,
+  },
 ];
 
 const Events = () => {
@@ -112,22 +156,44 @@ const Events = () => {
     }
   });
 
+  // Obtener imagen según el tipo de evento filtrado
+  const getBackgroundImage = () => {
+    const images = {
+      all: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1600&h=400&fit=crop',
+      cena: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&h=400&fit=crop',
+      concierto: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1600&h=400&fit=crop',
+      marcha: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=1600&h=400&fit=crop',
+      rifa: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=1600&h=400&fit=crop'
+    };
+    return images[filterType] || images.all;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          className="mb-12 text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Todos los Eventos
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Encuentra el evento perfecto para ti y contribuye a nuestra causa solidaria.
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="relative py-16 px-4 overflow-hidden" style={{
+        backgroundImage: `url(${getBackgroundImage()})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}>
+        <div className="absolute inset-0 bg-cudeca-darkGreen opacity-85"></div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Todos los Eventos
+            </h1>
+            <p className="text-xl md:text-2xl text-white max-w-3xl mx-auto">
+              Encuentra el evento perfecto para ti y contribuye a nuestra causa solidaria
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Filtros y ordenamiento */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -149,7 +215,7 @@ const Events = () => {
                     onClick={() => setFilterType(type.value)}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       filterType === type.value
-                        ? 'bg-cudeca-yellow text-gray-900 shadow-md'
+                        ? 'bg-cudeca-mediumGreen text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                     aria-pressed={filterType === type.value}

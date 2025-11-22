@@ -8,10 +8,12 @@ export default {
     extend: {
       colors: {
         cudeca: {
-          yellow: '#FFD700',
+          yellow: '#86EFAC',
           green: '#86EFAC',
           lightGreen: '#D1FAE5',
           darkGreen: '#059669',
+          mediumGreen: '#10B981',
+          paleGreen: '#ECFDF5',
         }
       },
       fontFamily: {

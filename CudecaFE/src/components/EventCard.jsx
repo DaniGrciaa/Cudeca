@@ -11,10 +11,17 @@ const EventCard = ({ event }) => {
   };
 
   const eventTypeColors = {
-    cena: 'bg-purple-100 text-purple-800',
-    concierto: 'bg-blue-100 text-blue-800',
+    cena: 'bg-green-100 text-green-800',
+    concierto: 'bg-green-100 text-green-800',
     marcha: 'bg-green-100 text-green-800',
-    rifa: 'bg-yellow-100 text-yellow-800',
+    rifa: 'bg-green-100 text-green-800',
+  };
+
+  const eventTypeImages = {
+    cena: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop',
+    concierto: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=300&fit=crop',
+    marcha: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=400&h=300&fit=crop',
+    rifa: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=300&fit=crop'
   };
 
   return (
@@ -27,17 +34,11 @@ const EventCard = ({ event }) => {
     >
       {/* Imagen del evento */}
       <div className="relative h-48 overflow-hidden bg-gray-200">
-        {event.image ? (
-          <img
-            src={event.image}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cudeca-yellow to-cudeca-green">
-            <Calendar className="w-16 h-16 text-gray-700" aria-hidden="true" />
-          </div>
-        )}
+        <img
+          src={event.image || eventTypeImages[event.type] || eventTypeImages.cena}
+          alt={event.title}
+          className="w-full h-full object-cover"
+        />
         
         {/* Badge de tipo de evento */}
         <span

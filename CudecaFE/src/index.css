@@ -23,19 +23,19 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-cudeca-yellow hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg focus:ring-4 focus:ring-cudeca-yellow focus:ring-offset-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-cudeca-mediumGreen hover:bg-cudeca-darkGreen text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg focus:ring-4 focus:ring-cudeca-mediumGreen focus:ring-offset-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-secondary {
-    @apply bg-cudeca-green hover:bg-green-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg focus:ring-4 focus:ring-cudeca-green focus:ring-offset-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-cudeca-green hover:bg-cudeca-mediumGreen text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg focus:ring-4 focus:ring-cudeca-green focus:ring-offset-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-outline {
-    @apply border-2 border-cudeca-yellow hover:bg-cudeca-yellow text-gray-900 font-bold py-3 px-6 rounded-lg transition-all duration-200 focus:ring-4 focus:ring-cudeca-yellow focus:ring-offset-2 text-lg;
+    @apply border-2 border-cudeca-mediumGreen hover:bg-cudeca-mediumGreen hover:text-white text-cudeca-darkGreen font-bold py-3 px-6 rounded-lg transition-all duration-200 focus:ring-4 focus:ring-cudeca-mediumGreen focus:ring-offset-2 text-lg;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-cudeca-yellow focus:ring-4 focus:ring-cudeca-yellow focus:ring-offset-2 transition-all duration-200;
+    @apply w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-cudeca-mediumGreen focus:ring-4 focus:ring-cudeca-mediumGreen focus:ring-offset-2 transition-all duration-200;
   }
   
   .card {

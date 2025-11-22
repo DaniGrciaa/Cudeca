@@ -1,18 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useState } from 'react';
 import useCartStore from '../store/useCartStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import cudecaLogo from '../images/cudeca-logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
 
   const navigation = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Eventos', href: '/events' },
-    { name: 'Voluntariado', href: '#volunteer' },
-    { name: 'Hazte Socio', href: '#member' },
+    { name: 'Eventos', href: '/eventos' },
+    { name: 'About Us', href: '/about-us' },
+    { name: 'Voluntariado', href: '/voluntariado' },
+    { name: 'Hazte Socio', href: '/hazte-socio' },
   ];
 
   return (
@@ -22,10 +23,14 @@ const Header = () => {
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg p-2"
+            className="flex items-center space-x-3 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg p-2"
             aria-label="Cudeca Eventos - Ir a inicio"
           >
-            <Heart className="w-8 h-8 text-cudeca-yellow fill-cudeca-yellow" aria-hidden="true" />
+            <img 
+              src={cudecaLogo} 
+              alt="Cudeca Logo" 
+              className="h-12 w-auto object-contain"
+            />
             <span className="text-2xl font-bold text-gray-900">Cudeca Eventos</span>
           </Link>
 
@@ -41,9 +46,18 @@ const Header = () => {
               </Link>
             ))}
             
+            {/* Profile Icon */}
+            <Link
+              to="/perfil"
+              className="p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg"
+              aria-label="Mi Perfil"
+            >
+              <User className="w-7 h-7 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
+            </Link>
+            
             {/* Cart Icon */}
             <Link
-              to="/checkout"
+              to="/carrito"
               className="relative p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg"
               aria-label={`Carrito de compras - ${itemCount} artículos`}
             >
@@ -92,7 +106,14 @@ const Header = () => {
                   </Link>
                 ))}
                 <Link
-                  to="/checkout"
+                  to="/perfil"
+                  className="text-lg font-medium text-gray-700 hover:text-cudeca-darkGreen hover:bg-gray-50 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Perfil
+                </Link>
+                <Link
+                  to="/carrito"
                   className="flex items-center justify-between text-lg font-medium text-gray-700 hover:text-cudeca-darkGreen hover:bg-gray-50 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow"
                   onClick={() => setIsMenuOpen(false)}
                 >

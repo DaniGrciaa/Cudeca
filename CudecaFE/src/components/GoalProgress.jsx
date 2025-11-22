@@ -7,11 +7,11 @@ const GoalProgress = ({ current = 0, goal = 10000, eventTitle = "Evento" }) => {
   const remaining = Math.max(goal - current, 0);
 
   const data = [
-    { name: 'Recaudado', value: current, color: '#FFD700' },
+    { name: 'Recaudado', value: current, color: '#10B981' },
     { name: 'Pendiente', value: remaining, color: '#E5E7EB' }
   ];
 
-  const COLORS = ['#FFD700', '#E5E7EB'];
+  const COLORS = ['#10B981', '#E5E7EB'];
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -98,7 +98,7 @@ const GoalProgress = ({ current = 0, goal = 10000, eventTitle = "Evento" }) => {
           {/* Barra de progreso */}
           <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <motion.div
-              className="bg-cudeca-yellow h-full rounded-full"
+              className="bg-cudeca-mediumGreen h-full rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
               transition={{ duration: 1, ease: 'easeOut' }}
@@ -121,7 +121,7 @@ const GoalProgress = ({ current = 0, goal = 10000, eventTitle = "Evento" }) => {
       </div>
 
       {/* Mensaje motivacional */}
-      <div className="mt-6 p-4 bg-cudeca-yellow bg-opacity-10 rounded-lg border-l-4 border-cudeca-yellow">
+      <div className="mt-6 p-4 bg-cudeca-paleGreen rounded-lg border-l-4 border-cudeca-mediumGreen">
         <p className="text-lg text-gray-700">
           <strong>¡Tu apoyo marca la diferencia!</strong> Cada contribución nos acerca a nuestro objetivo de ayudar a más personas.
         </p>
