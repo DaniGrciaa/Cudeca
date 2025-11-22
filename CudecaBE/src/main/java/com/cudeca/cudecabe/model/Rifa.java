@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 @Table(name = "rifa")
 public class Rifa {
     @Id
-    @ColumnDefault("nextval('rifa_id_rifa_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_rifa", nullable = false)
     private Integer id;
 

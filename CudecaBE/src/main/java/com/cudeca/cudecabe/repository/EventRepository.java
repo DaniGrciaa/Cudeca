@@ -8,14 +8,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface EventRepository extends JpaRepository<Evento, Long> {
-    public Evento findByNombre(String nombre);
-    public boolean existsByNombre(String nombre);
-    public Evento findById(Integer id);
-    public boolean existsById(Integer id);
-    public Evento findByFecha(LocalDate fecha);
-    public boolean existsByFecha(LocalDate fecha);
-    public Evento findByLugar(String lugar);
-    public boolean existsByLugar(String lugar);
-    public List<Evento> findAll();
+public interface EventRepository extends JpaRepository<Evento, Integer> {
+    Evento findByNombre(String nombre);
+    boolean existsByNombre(String nombre);
+    List<Evento> findByFecha(LocalDate fecha);
+    boolean existsByFecha(LocalDate fecha);
+    Evento findByLugar(String lugar);
+    boolean existsByLugar(String lugar);
+    List<Evento> findByNombreContainingIgnoreCase(String nombre);
+    List<Evento> findByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
 }

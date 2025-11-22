@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -17,7 +16,7 @@ import java.math.BigDecimal;
 @Table(name = "patrocinador")
 public class Patrocinador {
     @Id
-    @ColumnDefault("nextval('patrocinador_id_patrocinador_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_patrocinador", nullable = false)
     private Integer id;
 

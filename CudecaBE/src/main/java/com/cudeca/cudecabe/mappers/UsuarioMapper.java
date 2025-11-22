@@ -3,25 +3,51 @@ package com.cudeca.cudecabe.mappers;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioResponse;
 import com.cudeca.cudecabe.model.Usuario;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UsuarioMapper {
 
-    public static Usuario toEntity(UsuarioRequest dto) {
-        Usuario u = new Usuario();
-        u.setNombre(dto.getNombre());
-        u.setEmail(dto.getEmail());
-        u.setTelefono(dto.getTelefono());
-        u.setUsername(dto.getUsername());
-        return u;
+    public Usuario toEntity(UsuarioRequest request) {
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setEmail(request.getEmail());
+        usuario.setTelefono(request.getTelefono());
+        usuario.setUsername(request.getUsername());
+        usuario.setPassword(request.getPassword());
+        usuario.setRol(request.getRol() != null ? request.getRol() : "USER");
+        return usuario;
     }
 
-    public static UsuarioResponse toResponse(Usuario u) {
-        UsuarioResponse dto = new UsuarioResponse();
-        dto.setIdUser(u.getId());
-        dto.setNombre(u.getNombre());
-        dto.setEmail(u.getEmail());
-        dto.setTelefono(u.getTelefono());
-        dto.setUsername(u.getUsername());
-        return dto;
+    public UsuarioResponse toResponse(Usuario usuario) {
+        UsuarioResponse response = new UsuarioResponse();
+        response.setId(usuario.getId());
+        response.setNombre(usuario.getNombre());
+        response.setEmail(usuario.getEmail());
+        response.setTelefono(usuario.getTelefono());
+        response.setUsername(usuario.getUsername());
+        response.setRol(usuario.getRol());
+        return response;
+    }
+
+    public void updateEntity(UsuarioRequest request, Usuario usuario) {
+        if (request.getNombre() != null) {
+            usuario.setNombre(request.getNombre());
+        }
+        if (request.getEmail() != null) {
+            usuario.setEmail(request.getEmail());
+        }
+        if (request.getTelefono() != null) {
+            usuario.setTelefono(request.getTelefono());
+        }
+        if (request.getUsername() != null) {
+            usuario.setUsername(request.getUsername());
+        }
+        if (request.getPassword() != null) {
+            usuario.setPassword(request.getPassword());
+        }
+        if (request.getRol() != null) {
+            usuario.setRol(request.getRol());
+        }
     }
 }

@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Table(name = "compra")
 public class Compra {
     @Id
-    @ColumnDefault("nextval('compra_id_compra_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_compra", nullable = false)
     private Integer id;
 

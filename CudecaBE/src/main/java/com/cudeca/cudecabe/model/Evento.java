@@ -1,9 +1,6 @@
 package com.cudeca.cudecabe.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,7 +16,7 @@ import java.time.LocalDate;
 @Table(name = "evento")
 public class Evento {
     @Id
-    @ColumnDefault("nextval('evento_id_evento_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_evento", nullable = false)
     private Integer id;
 
