@@ -1,42 +1,59 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Euro, Users, ArrowLeft, Plus, Minus } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
 import GoalProgress from '../components/GoalProgress';
-
-// TODO: Reemplazar con datos de la API
-const mockEvents = [
-  {
-    id: 1,
-    title: 'Cena Benéfica de Gala',
-    description: 'Una noche elegante para recaudar fondos con cena, música en vivo y subasta.',
-    longDescription: 'Únete a nosotros para una velada inolvidable llena de elegancia y solidaridad. Disfruta de un menú gourmet preparado por chefs reconocidos, música en vivo y una emocionante subasta con artículos exclusivos. Todos los fondos recaudados se destinarán a los programas de cuidados paliativos de Cudeca.',
-    type: 'cena',
-    price: 75.00,
-    date: '15 de Diciembre, 2025',
-    location: 'Hotel Vincci Selección Aleysa, Benalmádena',
-    image: null,
-    availableTickets: 150,
-    schedule: '20:00h - 01:00h',
-    includes: [
-      'Cóctel de bienvenida',
-      'Cena de 4 platos + maridaje',
-      'Música en vivo',
-      'Acceso a subasta benéfica',
-      'Parking gratuito',
-    ],
-  },
-];
+import { eventosAPI } from '../services/api';
 
 const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
 
-  // TODO: Obtener evento de la API usando el id
-  const event = mockEvents.find(e => e.id === parseInt(id)) || mockEvents[0];
+  useEffect(() => {
+    const fetchEvento = async () => {
+      try {
+        setLoading(true);
+        const data = await eventosAPI.getById(id);
+        
+        // Transformar datos del backend al formato del frontend
+        const transformedEvent = {
+          id: data.id,
+          title: data.nombre,
+          description: data.descripcion || 'Evento solidario de Cudeca',
+          longDescription: data.descripcionLarga || data.descripcion,
+          type: data.tipoEvento?.toLowerCase() || 'cena',
+          price: data.precio || 0,
+          date: new Date(data.fecha).toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          location: data.ubicacion || 'Por confirmar',
+          image: data.imagenUrl || null,
+          availableTickets: data.aforoMaximo - (data.entradasVendidas || 0),
+          schedule: data.horario || null,
+          includes: data.incluye ? data.incluye.split(',').map(item => item.trim()) : [],
+          current: data.recaudacionActual || 0,
+          goal: data.metaRecaudacion || 0,
+        };
+        
+        setEvent(transformedEvent);
+      } catch (err) {
+        console.error('Error al cargar evento:', err);
+        // Redirigir a la página de eventos si no se encuentra
+        navigate('/eventos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvento();
+  }, [id, navigate]);
 
   const handleAddToCart = () => {
     addItem(event, quantity);
@@ -58,6 +75,23 @@ const EventDetail = () => {
     marcha: 'bg-green-100 text-green-800',
     rifa: 'bg-yellow-100 text-yellow-800',
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-24">
+            <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-cudeca-mediumGreen mb-4"></div>
+            <p className="text-xl text-gray-600">Cargando evento...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -252,9 +286,11 @@ const EventDetail = () => {
             </div>
 
             {/* Progreso de recaudación del evento */}
-            <div className="mt-8">
-              <GoalProgress current={4200} goal={7500} eventTitle={event.title} />
-            </div>
+            {event.goal > 0 && (
+              <div className="mt-8">
+                <GoalProgress current={event.current} goal={event.goal} eventTitle={event.title} />
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

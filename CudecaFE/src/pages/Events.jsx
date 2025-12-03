@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Filter } from 'lucide-react';
 import EventCard from '../components/EventCard';
+import { eventosAPI } from '../services/api';
 
 // TODO: Reemplazar con datos de la API
 const mockEvents = [
@@ -120,6 +121,9 @@ const mockEvents = [
 const Events = () => {
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('date');
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const eventTypes = [
     { value: 'all', label: 'Todos' },
@@ -136,10 +140,59 @@ const Events = () => {
     { value: 'title', label: 'Nombre' },
   ];
 
-  // TODO: Obtener eventos de la API
+  // Cargar eventos desde el backend
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const data = await eventosAPI.getAll();
+        
+        // Si no hay datos del backend, usar mock data
+        if (!data || data.length === 0) {
+          console.log('No hay eventos en el backend, usando datos de ejemplo');
+          setEventos(mockEvents);
+          setError('Mostrando eventos de ejemplo. Conecta el backend para ver datos reales.');
+          return;
+        }
+        
+        // Transformar datos del backend al formato del frontend
+        const transformedEvents = data.map(evento => ({
+          id: evento.id,
+          title: evento.nombre,
+          description: evento.descripcion || 'Evento solidario de Cudeca',
+          type: evento.tipoEvento?.toLowerCase() || 'cena',
+          price: evento.precio || 0,
+          date: new Date(evento.fecha).toLocaleDateString('es-ES', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          }),
+          location: evento.ubicacion || 'Por confirmar',
+          image: null,
+          availableTickets: (evento.aforoMaximo || 100) - (evento.entradasVendidas || 0),
+        }));
+        
+        setEventos(transformedEvents);
+        console.log(`Cargados ${transformedEvents.length} eventos desde el backend`);
+      } catch (err) {
+        console.error('Error al cargar eventos:', err);
+        setError('No se pudo conectar con el backend. Mostrando eventos de ejemplo.');
+        // Fallback a datos mock si falla
+        setEventos(mockEvents);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventos();
+  }, []);
+
+  // Filtrar eventos
   let filteredEvents = filterType === 'all'
-    ? mockEvents
-    : mockEvents.filter(event => event.type === filterType);
+    ? eventos
+    : eventos.filter(event => event.type === filterType);
 
   // Ordenar eventos
   filteredEvents = [...filteredEvents].sort((a, b) => {
@@ -254,21 +307,36 @@ const Events = () => {
           </div>
         </div>
 
-        {/* Grid de eventos */}
-        {filteredEvents.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event, index) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <EventCard event={event} />
-              </motion.div>
-            ))}
+        {/* Mensaje de error */}
+        {error && (
+          <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <p className="text-yellow-800">{error}</p>
+          </div>
+        )}
+
+        {/* Indicador de carga */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cudeca-mediumGreen"></div>
+            <p className="text-xl text-gray-600 mt-4">Cargando eventos...</p>
           </div>
         ) : (
+          <>
+            {/* Grid de eventos */}
+            {filteredEvents.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredEvents.map((event, index) => (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <EventCard event={event} />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
           <motion.div
             className="text-center py-12 bg-white rounded-lg shadow-md"
             initial={{ opacity: 0 }}
@@ -284,6 +352,8 @@ const Events = () => {
               Ver Todos los Eventos
             </button>
           </motion.div>
+        )}
+          </>
         )}
       </div>
     </div>

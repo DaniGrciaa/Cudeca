@@ -48,9 +48,42 @@ const Carrito = () => {
   const fees = subtotal * 0.03; // 3% de gastos de gestión
   const total = subtotal + fees;
 
-  const handleCheckout = () => {
-    // TODO: Integrar con backend
-    alert('Procesando pago...');
+  const handleCheckout = async () => {
+    try {
+      // Por ahora usamos un ID de usuario fijo - en producción vendría de la autenticación
+      const userId = 1;
+      
+      // Crear una compra por cada item en el carrito
+      for (const item of cartItems) {
+        const nuevaCompra = {
+          usuarioId: userId,
+          eventoId: item.id,
+          cantidadEntradas: item.quantity,
+          precioTotal: item.price * item.quantity,
+          metodoPago: selectedPaymentMethod === 'existing' ? 'tarjeta' : selectedPaymentMethod,
+          estadoPago: 'Completado',
+          fechaCompra: new Date().toISOString()
+        };
+        
+        const response = await fetch('http://localhost:8080/api/compras', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevaCompra),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al procesar la compra');
+        }
+      }
+      
+      alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
+      setCartItems([]); // Vaciar carrito
+    } catch (err) {
+      console.error('Error al procesar pago:', err);
+      alert('Hubo un error al procesar tu pago. Por favor, inténtalo de nuevo.');
+    }
   };
 
   if (cartItems.length === 0) {

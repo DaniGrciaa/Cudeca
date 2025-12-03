@@ -1,13 +1,21 @@
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import useCartStore from '../store/useCartStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import cudecaLogo from '../images/cudeca-logo.png';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const navigation = [
     { name: 'Eventos', href: '/eventos' },
@@ -46,14 +54,35 @@ const Header = () => {
               </Link>
             ))}
             
-            {/* Profile Icon */}
-            <Link
-              to="/perfil"
-              className="p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg"
-              aria-label="Mi Perfil"
-            >
-              <User className="w-7 h-7 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
-            </Link>
+            {/* Profile / Login */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/perfil"
+                  className="flex items-center gap-2 p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100"
+                  aria-label="Mi Perfil"
+                >
+                  <User className="w-6 h-6 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
+                  <span className="text-sm font-medium text-gray-700">{user?.nombre}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100"
+                  aria-label="Cerrar sesión"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-6 h-6 text-gray-700 hover:text-red-600 transition-colors" aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 bg-cudeca-darkGreen text-white font-medium px-4 py-2 rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow"
+              >
+                <User className="w-5 h-5" aria-hidden="true" />
+                Iniciar Sesión
+              </Link>
+            )}
             
             {/* Cart Icon */}
             <Link

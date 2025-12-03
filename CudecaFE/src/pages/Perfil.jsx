@@ -1,52 +1,125 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, MapPin, Heart, Phone, Edit2, Save, X, Calendar, CheckCircle } from 'lucide-react';
+import { User, Mail, MapPin, Heart, Phone, Edit2, Save, X, Calendar, CheckCircle, LogIn, UserPlus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { usuariosAPI, comprasAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Perfil = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    nombre: 'María García López',
-    email: 'maria.garcia@email.com',
-    ciudad: 'Málaga',
-    socio: 'Sí - Desde Marzo 2024',
-    telefono: '+34 600 123 456',
-    direccion: 'Calle Larios, 12, 3º B',
-    codigoPostal: '29015'
+    nombre: '',
+    email: '',
+    ciudad: '',
+    socio: '',
+    telefono: '',
+    direccion: '',
+    codigoPostal: ''
   });
 
   const [editData, setEditData] = useState({ ...profileData });
+  const [donaciones, setDonaciones] = useState([]);
 
-  // Mock donation history
-  const donaciones = [
-    {
-      id: 1,
-      evento: 'Cena Benéfica de Gala',
-      fecha: '15 Nov 2024',
-      cantidad: 75.00,
-      status: 'Completado'
-    },
-    {
-      id: 2,
-      evento: 'Concierto Solidario',
-      fecha: '22 Oct 2024',
-      cantidad: 25.00,
-      status: 'Completado'
-    },
-    {
-      id: 3,
-      evento: 'Marcha Solidaria 10K',
-      fecha: '10 Sep 2024',
-      cantidad: 15.00,
-      status: 'Completado'
-    },
-    {
-      id: 4,
-      evento: 'Membresía Mensual',
-      fecha: '01 Nov 2024',
-      cantidad: 15.00,
-      status: 'Completado'
-    }
-  ];
+  // Si no está autenticado, mostrar mensaje de login
+  if (!authLoading && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="text-center py-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="bg-white rounded-lg shadow-xl p-12">
+              <User className="w-24 h-24 mx-auto mb-6 text-gray-300" aria-hidden="true" />
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Inicia Sesión para Ver tu Perfil
+              </h1>
+              <p className="text-xl text-gray-600 mb-8">
+                Necesitas iniciar sesión para acceder a tu perfil y ver tu historial de donaciones
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center gap-2 bg-cudeca-darkGreen text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
+                >
+                  <LogIn className="w-6 h-6" />
+                  Iniciar Sesión
+                </Link>
+                
+                <Link
+                  to="/hazte-socio"
+                  className="inline-flex items-center justify-center gap-2 bg-white border-2 border-cudeca-mediumGreen text-cudeca-darkGreen font-bold py-4 px-8 rounded-lg hover:bg-cudeca-lightGreen transition-all duration-200 text-lg"
+                >
+                  <UserPlus className="w-6 h-6" />
+                  Registrarse como Socio
+                </Link>
+              </div>
+
+              <p className="mt-6 text-gray-600">
+                ¿No tienes cuenta? Regístrate como socio y apoya la labor de Cudeca
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+    
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        
+        // Obtener datos del usuario
+        const userData = await usuariosAPI.getById(userId);
+        
+        const transformedProfile = {
+          nombre: userData.nombre || 'Sin nombre',
+          email: userData.email,
+          ciudad: 'No especificada',
+          socio: 'Sí - Socio de Cudeca',
+          telefono: userData.telefono || 'No especificado',
+          direccion: 'No especificada',
+          codigoPostal: 'No especificado'
+        };
+        
+        setProfileData(transformedProfile);
+        setEditData(transformedProfile);
+        
+        // Obtener historial de compras del usuario
+        const compras = await comprasAPI.getByUsuarioId(userId);
+        
+        const transformedDonaciones = compras.map(compra => ({
+          id: compra.id,
+          evento: compra.evento?.nombre || 'Evento no especificado',
+          fecha: new Date(compra.fechaCompra).toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          }),
+          cantidad: compra.precioTotal || 0,
+          status: compra.estadoPago || 'Completado'
+        }));
+        
+        setDonaciones(transformedDonaciones);
+      } catch (err) {
+        console.error('Error al cargar datos del usuario:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
 
   const totalDonado = donaciones.reduce((sum, d) => sum + d.cantidad, 0);
 
@@ -55,11 +128,25 @@ const Perfil = () => {
     setEditData({ ...profileData });
   };
 
-  const handleSave = () => {
-    setProfileData({ ...editData });
-    setIsEditing(false);
-    // TODO: Guardar en backend
-    alert('Perfil actualizado correctamente');
+  const handleSave = async () => {
+    try {
+      const updatedUser = {
+        nombre: editData.nombre,
+        email: editData.email,
+        telefono: editData.telefono !== 'No especificado' ? editData.telefono : null,
+        username: user.email.split('@')[0],
+        password: 'temporal123', // Mantener la contraseña existente
+        rol: 'SOCIO'
+      };
+      
+      await usuariosAPI.update(userId, updatedUser);
+      setProfileData({ ...editData });
+      setIsEditing(false);
+      alert('Perfil actualizado correctamente');
+    } catch (err) {
+      console.error('Error al actualizar perfil:', err);
+      alert('Error al actualizar el perfil. Por favor, inténtalo de nuevo.');
+    }
   };
 
   const handleCancel = () => {
@@ -74,6 +161,19 @@ const Perfil = () => {
       [name]: value
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-24">
+            <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-cudeca-mediumGreen mb-4"></div>
+            <p className="text-xl text-gray-600">Cargando perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

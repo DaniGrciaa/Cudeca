@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import EventCard from '../components/EventCard';
 import GoalProgress from '../components/GoalProgress';
 import VolunteerOptions from '../components/VolunteerOptions';
+import { eventosAPI } from '../services/api';
 
 // TODO: Reemplazar con datos de la API
 const mockEvents = [
@@ -76,6 +77,53 @@ const mockEvents = [
 ];
 
 const Home = () => {
+  const [eventos, setEventos] = useState(mockEvents);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        setLoading(true);
+        const data = await eventosAPI.getAll();
+        
+        // Si no hay datos del backend, usar mock data
+        if (!data || data.length === 0) {
+          console.log('No hay eventos en el backend, usando datos de ejemplo');
+          setEventos(mockEvents);
+          setLoading(false);
+          return;
+        }
+        
+        // Transformar datos del backend
+        const transformedEvents = data.map(evento => ({
+          id: evento.id,
+          title: evento.nombre,
+          description: evento.descripcion || 'Evento solidario de Cudeca',
+          type: evento.tipoEvento?.toLowerCase() || 'cena',
+          price: evento.precio || 0,
+          date: new Date(evento.fecha).toLocaleDateString('es-ES', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          }),
+          location: evento.ubicacion || 'Por confirmar',
+          image: null,
+          availableTickets: (evento.aforoMaximo || 100) - (evento.entradasVendidas || 0),
+        }));
+        
+        setEventos(transformedEvents);
+        console.log(`Cargados ${transformedEvents.length} eventos en Home`);
+      } catch (err) {
+        console.error('Error al cargar eventos:', err);
+        // Mantener datos mock si falla
+        setEventos(mockEvents);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventos();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,11 +171,18 @@ const Home = () => {
               </h2>
               
               {/* Grid de eventos destacados */}
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {mockEvents.slice(0, 4).map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cudeca-mediumGreen"></div>
+                  <p className="text-lg text-gray-600 mt-4">Cargando eventos...</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {eventos.slice(0, 4).map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              )}
 
               <div className="text-center">
                 <a

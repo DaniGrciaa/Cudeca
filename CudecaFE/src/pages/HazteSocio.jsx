@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, CreditCard, Mail, MapPin, User, DollarSign } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const HazteSocio = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     nombre: '',
     apellidos: '',
     email: '',
+    password: '',
     direccion: '',
     ciudad: '',
     codigoPostal: '',
@@ -15,7 +20,7 @@ const HazteSocio = () => {
     donacionMensual: 15
   });
 
-  const donationOptions = [5, 10, 15, 25, 50];
+  const donationOptions = [0, 5, 10, 15, 25, 50];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,11 +37,45 @@ const HazteSocio = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Integrar con backend
-    console.log('Datos de socio:', formData);
-    alert('¡Gracias por hacerte socio de Cudeca! Procesaremos tu solicitud pronto.');
+    
+    // Validar que la contraseña tenga al menos 6 caracteres
+    if (formData.password.length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    try {
+      console.log('Intentando registrar usuario con:', {
+        email: formData.email,
+        nombre: formData.nombre,
+        apellidos: formData.apellidos
+      });
+      
+      // Registrar el usuario y automáticamente iniciar sesión
+      await register({
+        nombre: formData.nombre,
+        apellidos: formData.apellidos,
+        email: formData.email,
+        password: formData.password,
+        telefono: formData.telefono || null,
+        direccion: formData.direccion || null,
+        ciudad: formData.ciudad || null,
+        codigoPostal: formData.codigoPostal || null,
+        donacionMensual: formData.donacionMensual,
+        metodoPago: formData.metodoPago,
+      });
+      
+      alert('¡Gracias por hacerte socio de Cudeca! Tu cuenta ha sido creada exitosamente.');
+      
+      // Redirigir al perfil
+      navigate('/perfil');
+    } catch (err) {
+      console.error('Error completo al enviar formulario:', err);
+      const errorMessage = err.message || 'Hubo un error al procesar tu solicitud';
+      alert(`Error: ${errorMessage}\n\nPor favor, verifica que el email no esté ya registrado e inténtalo de nuevo.`);
+    }
   };
 
   return (
@@ -123,21 +162,40 @@ const HazteSocio = () => {
                 </div>
               </div>
 
-              <div className="mt-6">
-                <label htmlFor="email" className="block text-lg font-semibold text-gray-900 mb-2">
-                  Email <span className="text-red-600">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" aria-hidden="true" />
+              <div className="mt-6 grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="email" className="block text-lg font-semibold text-gray-900 mb-2">
+                    Email <span className="text-red-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" aria-hidden="true" />
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="input-field pl-12"
+                      placeholder="tu@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-lg font-semibold text-gray-900 mb-2">
+                    Contraseña <span className="text-red-600">*</span>
+                  </label>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
                     onChange={handleChange}
                     required
-                    className="input-field pl-12"
-                    placeholder="tu@email.com"
+                    minLength="6"
+                    className="input-field"
+                    placeholder="Mínimo 6 caracteres"
                   />
                 </div>
               </div>
@@ -168,7 +226,7 @@ const HazteSocio = () => {
               <div className="space-y-6">
                 <div>
                   <label htmlFor="direccion" className="block text-lg font-semibold text-gray-900 mb-2">
-                    Dirección Completa <span className="text-red-600">*</span>
+                    Dirección Completa
                   </label>
                   <input
                     type="text"
@@ -185,7 +243,7 @@ const HazteSocio = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="ciudad" className="block text-lg font-semibold text-gray-900 mb-2">
-                      Ciudad <span className="text-red-600">*</span>
+                      Ciudad
                     </label>
                     <input
                       type="text"
@@ -193,7 +251,6 @@ const HazteSocio = () => {
                       name="ciudad"
                       value={formData.ciudad}
                       onChange={handleChange}
-                      required
                       className="input-field"
                       placeholder="Tu ciudad"
                     />
@@ -201,7 +258,7 @@ const HazteSocio = () => {
 
                   <div>
                     <label htmlFor="codigoPostal" className="block text-lg font-semibold text-gray-900 mb-2">
-                      Código Postal <span className="text-red-600">*</span>
+                      Código Postal
                     </label>
                     <input
                       type="text"
@@ -209,7 +266,6 @@ const HazteSocio = () => {
                       name="codigoPostal"
                       value={formData.codigoPostal}
                       onChange={handleChange}
-                      required
                       className="input-field"
                       placeholder="29000"
                     />
@@ -229,7 +285,10 @@ const HazteSocio = () => {
                 <label className="block text-lg font-semibold text-gray-900 mb-3">
                   Selecciona la cantidad <span className="text-red-600">*</span>
                 </label>
-                <div className="grid grid-cols-5 gap-3">
+                <p className="text-sm text-gray-600 mb-3">
+                  Puedes seleccionar 0€ si prefieres ser voluntario sin donación mensual
+                </p>
+                <div className="grid grid-cols-6 gap-3">
                   {donationOptions.map((amount) => (
                     <button
                       key={amount}
@@ -253,9 +312,9 @@ const HazteSocio = () => {
                     <input
                       type="number"
                       id="customAmount"
-                      min="1"
+                      min="0"
                       value={formData.donacionMensual}
-                      onChange={(e) => handleDonationChange(parseInt(e.target.value) || 5)}
+                      onChange={(e) => handleDonationChange(parseInt(e.target.value) || 0)}
                       className="input-field pr-12"
                       placeholder="Cantidad personalizada"
                     />

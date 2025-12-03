@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Users, Calendar, Clock, MapPin, Mail, Phone, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Users, Calendar, Clock, MapPin, Mail, Phone, CheckCircle, X } from 'lucide-react';
 
 const Voluntariado = () => {
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     apellidos: '',
@@ -44,9 +45,26 @@ const Voluntariado = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Integrar con backend
-    console.log('Solicitud de voluntariado:', formData);
-    alert('¡Gracias por tu interés en ser voluntario! Nos pondremos en contacto contigo pronto.');
+    
+    // Mostrar modal de éxito
+    setShowSuccessModal(true);
+    
+    // Resetear formulario
+    setFormData({
+      nombre: '',
+      apellidos: '',
+      email: '',
+      telefono: '',
+      ciudad: '',
+      disponibilidad: '',
+      areas: [],
+      experiencia: '',
+      motivacion: ''
+    });
+  };
+
+  const closeModal = () => {
+    setShowSuccessModal(false);
   };
 
   return (
@@ -342,6 +360,74 @@ const Voluntariado = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Modal de Éxito */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Botón cerrar */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Icono de éxito */}
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 bg-cudeca-mediumGreen rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-12 h-12 text-white" />
+                </div>
+              </div>
+
+              {/* Título */}
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
+                ¡Gracias por tu Interés!
+              </h2>
+
+              {/* Mensaje */}
+              <p className="text-lg text-gray-700 text-center mb-6">
+                Hemos recibido tu solicitud para ser voluntario de Cudeca. 
+                Nuestro equipo revisará tu información y se pondrá en contacto contigo pronto.
+              </p>
+
+              <div className="bg-cudeca-lightGreen p-4 rounded-lg mb-6">
+                <p className="text-sm text-gray-700 text-center">
+                  <strong>📧 Te enviaremos un email de confirmación</strong><br />
+                  Revisa tu bandeja de entrada en las próximas 48 horas
+                </p>
+              </div>
+
+              {/* Botón de cerrar */}
+              <button
+                onClick={closeModal}
+                className="w-full bg-cudeca-darkGreen text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Entendido
+              </button>
+
+              {/* Mensaje adicional */}
+              <p className="text-sm text-gray-600 text-center mt-4">
+                ¿Tienes preguntas? Escríbenos a <a href="mailto:voluntariado@cudeca.org" className="text-cudeca-darkGreen font-semibold hover:underline">voluntariado@cudeca.org</a>
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
