@@ -23,5 +23,6 @@ public interface EventoService {
     List<EventoResponse> getEventosPasados();
     List<EventoResponse> getEventosByMesYAnio(Integer mes, Integer anio);
     List<EventoResponse> filtrarEventos(EventoFilterRequest filtros);
+    List<EventoResponse> getEventosByTipo(String tipo);
 }
 

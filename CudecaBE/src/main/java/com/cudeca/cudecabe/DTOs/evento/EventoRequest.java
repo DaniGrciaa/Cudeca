@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.DTOs.evento;
 
+import com.cudeca.cudecabe.model.TipoEvento;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -21,6 +22,10 @@ public class EventoRequest {
 
     @Size(max = 200, message = "El lugar no puede exceder 200 caracteres")
     private String lugar;
+
+    private TipoEvento tipo;
+
+    private BigDecimal precio;
 
     private BigDecimal totalRecaudado;
 }

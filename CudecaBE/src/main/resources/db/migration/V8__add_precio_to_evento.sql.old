@@ -1,0 +1,12 @@
+-- Añadir columna tipo a la tabla evento
+ALTER TABLE evento ADD COLUMN tipo VARCHAR(20);
+
+-- Comentario explicativo
+COMMENT ON COLUMN evento.tipo IS 'Tipo de evento: CENA, CONCIERTO, MARCHA, RIFA';
+
+-- Añadir columna precio a la tabla evento
+ALTER TABLE evento ADD COLUMN precio NUMERIC(10, 2) DEFAULT 0;
+
+-- Comentario explicativo
+COMMENT ON COLUMN evento.precio IS 'Precio del evento';
+

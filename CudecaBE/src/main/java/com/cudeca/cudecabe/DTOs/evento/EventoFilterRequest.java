@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.DTOs.evento;
 
+import com.cudeca.cudecabe.model.TipoEvento;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,6 +15,9 @@ public class EventoFilterRequest {
 
     // Filtro por lugar (búsqueda parcial)
     private String lugar;
+
+    // Filtro por tipo de evento
+    private TipoEvento tipo;
 
     // Filtro por fecha exacta
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

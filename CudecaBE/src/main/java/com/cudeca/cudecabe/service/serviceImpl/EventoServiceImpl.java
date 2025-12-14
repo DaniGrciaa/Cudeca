@@ -162,6 +162,7 @@ public class EventoServiceImpl implements EventoService {
         List<Evento> eventos = eventoRepository.findByFiltros(
             filtros.getNombre(),
             filtros.getLugar(),
+            filtros.getTipo(),
             fechaDesde,
             fechaHasta,
             filtros.getRecaudacionMinima(),
@@ -179,6 +180,19 @@ public class EventoServiceImpl implements EventoService {
         }
 
         return responses;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventoResponse> getEventosByTipo(String tipo) {
+        try {
+            com.cudeca.cudecabe.model.TipoEvento tipoEvento = com.cudeca.cudecabe.model.TipoEvento.valueOf(tipo.toUpperCase());
+            return eventoRepository.findByTipo(tipoEvento).stream()
+                    .map(eventoMapper::toResponse)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Tipo de evento no válido: " + tipo + ". Valores válidos: CENA, CONCIERTO, MARCHA, RIFA");
+        }
     }
 
     private List<EventoResponse> aplicarOrdenamiento(List<EventoResponse> eventos, String ordenarPor, String direccion) {

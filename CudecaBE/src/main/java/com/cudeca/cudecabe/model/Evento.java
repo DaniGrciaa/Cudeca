@@ -37,6 +37,14 @@ public class Evento {
     @Column(name = "lugar", length = 200)
     private String lugar;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", length = 20)
+    private TipoEvento tipo;
+
+    @ColumnDefault("0")
+    @Column(name = "precio", precision = 10, scale = 2)
+    private BigDecimal precio;
+
     @ColumnDefault("0")
     @Column(name = "total_recaudado", precision = 10, scale = 2)
     private BigDecimal totalRecaudado;

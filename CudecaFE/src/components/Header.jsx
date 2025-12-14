@@ -1,14 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
-import useCartStore from '../store/useCartStore';
+import { useCart } from '../context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import cudecaLogo from '../images/cudeca-logo.png';
 import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const itemCount = useCartStore((state) => state.getItemCount());
+  const { getTotalItems } = useCart();
+  const itemCount = getTotalItems();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 

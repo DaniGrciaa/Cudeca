@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Euro } from 'lucide-react';
 import { motion } from 'framer-motion';
-import useCartStore from '../store/useCartStore';
+import { useCart } from '../context/CartContext';
 
 const EventCard = ({ event }) => {
-  const addItem = useCartStore((state) => state.addItem);
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
-    addItem(event, 1);
+    addToCart(event, 1);
   };
 
   const eventTypeColors = {
@@ -77,29 +77,25 @@ const EventCard = ({ event }) => {
           )}
           
           <div className="flex items-center text-cudeca-darkGreen font-bold text-xl">
-            <Euro className="w-6 h-6 mr-1" aria-hidden="true" />
-            <span>{event.price.toFixed(2)}</span>
+            {event.price > 0 ? (
+              <>
+                <Euro className="w-6 h-6 mr-1" aria-hidden="true" />
+                <span>{event.price.toFixed(2)}</span>
+              </>
+            ) : (
+              <span className="text-lg">Entrada gratuita</span>
+            )}
           </div>
         </div>
 
         {/* Acciones */}
-        <div className="flex gap-3">
-          <Link
-            to={`/events/${event.id}`}
-            className="flex-1 btn-outline text-center"
-            aria-label={`Ver detalles de ${event.title}`}
-          >
-            Ver Detalles
-          </Link>
-          
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 btn-primary"
-            aria-label={`Añadir ${event.title} al carrito`}
-          >
-            Comprar
-          </button>
-        </div>
+        <button
+          onClick={handleAddToCart}
+          className="w-full btn-primary"
+          aria-label={`Añadir ${event.title} al carrito`}
+        >
+          Añadir al Carrito
+        </button>
       </div>
     </motion.article>
   );

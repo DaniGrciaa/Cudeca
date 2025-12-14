@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.DTOs.evento;
 
+import com.cudeca.cudecabe.model.TipoEvento;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,6 +14,8 @@ public class EventoResponse {
     private LocalDate fecha;
     private String descripcion;
     private String lugar;
+    private TipoEvento tipo;
+    private BigDecimal precio;
     private BigDecimal totalRecaudado;
 }
 

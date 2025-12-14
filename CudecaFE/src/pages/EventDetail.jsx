@@ -20,7 +20,6 @@ const EventDetail = () => {
         setLoading(true);
         const data = await eventosAPI.getById(id);
         
-        // Transformar datos del backend al formato del frontend
         const transformedEvent = {
           id: data.id,
           title: data.nombre,

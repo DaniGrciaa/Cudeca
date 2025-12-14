@@ -4,120 +4,6 @@ import { Filter } from 'lucide-react';
 import EventCard from '../components/EventCard';
 import { eventosAPI } from '../services/api';
 
-// TODO: Reemplazar con datos de la API
-const mockEvents = [
-  {
-    id: 1,
-    title: 'Cena Benéfica de Gala',
-    description: 'Una noche elegante para recaudar fondos con cena, música en vivo y subasta.',
-    type: 'cena',
-    price: 75.00,
-    date: '15 de Diciembre, 2025',
-    location: 'Hotel Vincci Selección Aleysa, Benalmádena',
-    image: null,
-    availableTickets: 150,
-  },
-  {
-    id: 2,
-    title: 'Concierto Solidario: Música por la Vida',
-    description: 'Disfruta de una velada musical con artistas locales comprometidos con nuestra causa.',
-    type: 'concierto',
-    price: 25.00,
-    date: '20 de Enero, 2026',
-    location: 'Auditorio de la Diputación, Málaga',
-    image: null,
-    availableTickets: 300,
-  },
-  {
-    id: 3,
-    title: 'Gran Rifa Solidaria',
-    description: 'Participa en nuestra rifa con increíbles premios. ¡Toda la recaudación va a Cudeca!',
-    type: 'rifa',
-    price: 5.00,
-    date: 'Sorteo: 1 de Febrero, 2026',
-    location: 'Online',
-    image: null,
-    availableTickets: 1000,
-  },
-  {
-    id: 4,
-    title: 'Marcha Solidaria 10K',
-    description: 'Camina o corre por una buena causa. Incluye camiseta, dorsal y avituallamiento.',
-    type: 'marcha',
-    price: 15.00,
-    date: '10 de Marzo, 2026',
-    location: 'Paseo Marítimo de Benalmádena',
-    image: null,
-    availableTickets: 500,
-  },
-  {
-    id: 5,
-    title: 'Concierto de Navidad',
-    description: 'Celebra la Navidad con villancicos y música clásica en un ambiente único.',
-    type: 'concierto',
-    price: 20.00,
-    date: '22 de Diciembre, 2025',
-    location: 'Iglesia de Santo Domingo, Málaga',
-    image: null,
-    availableTickets: 200,
-  },
-  {
-    id: 6,
-    title: 'Cena de San Valentín',
-    description: 'Una cena romántica para dos con menú especial y espectáculo incluido.',
-    type: 'cena',
-    price: 120.00,
-    date: '14 de Febrero, 2026',
-    location: 'Restaurante La Ola, Marbella',
-    image: null,
-    availableTickets: 80,
-  },
-  {
-    id: 7,
-    title: 'Cena Solidaria de Primavera',
-    description: 'Disfruta de una deliciosa cena con los mejores productos de temporada.',
-    type: 'cena',
-    price: 65.00,
-    date: '5 de Abril, 2026',
-    location: 'Hotel Alay, Benalmádena',
-    image: null,
-    availableTickets: 200,
-  },
-  {
-    id: 8,
-    title: 'Concierto de Rock Solidario',
-    description: 'Las mejores bandas locales de rock se unen por una causa benéfica.',
-    type: 'concierto',
-    price: 30.00,
-    date: '15 de Mayo, 2026',
-    location: 'Sala París 15, Málaga',
-    image: null,
-    availableTickets: 400,
-  },
-  {
-    id: 9,
-    title: 'Marcha Cicloturista Solidaria',
-    description: 'Recorre 50km por la costa en bicicleta. Incluye avituallamiento y medalla.',
-    type: 'marcha',
-    price: 20.00,
-    date: '25 de Mayo, 2026',
-    location: 'Salida: Puerto Deportivo de Benalmádena',
-    image: null,
-    availableTickets: 350,
-  },
-  {
-    id: 10,
-    title: 'Rifa de Verano',
-    description: 'Gana fantásticos premios veraniegos mientras apoyas nuestra causa.',
-    type: 'rifa',
-    price: 3.00,
-    date: 'Sorteo: 15 de Junio, 2026',
-    location: 'Online',
-    image: null,
-    availableTickets: 2000,
-  },
-];
-
 const Events = () => {
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -149,11 +35,9 @@ const Events = () => {
         
         const data = await eventosAPI.getAll();
         
-        // Si no hay datos del backend, usar mock data
         if (!data || data.length === 0) {
-          console.log('No hay eventos en el backend, usando datos de ejemplo');
-          setEventos(mockEvents);
-          setError('Mostrando eventos de ejemplo. Conecta el backend para ver datos reales.');
+          setEventos([]);
+          setError('No hay eventos disponibles en este momento.');
           return;
         }
         
@@ -162,25 +46,26 @@ const Events = () => {
           id: evento.id,
           title: evento.nombre,
           description: evento.descripcion || 'Evento solidario de Cudeca',
-          type: evento.tipoEvento?.toLowerCase() || 'cena',
+          type: evento.tipo ? evento.tipo.toLowerCase() : 'cena',
           price: evento.precio || 0,
           date: new Date(evento.fecha).toLocaleDateString('es-ES', { 
             day: 'numeric', 
             month: 'long', 
             year: 'numeric' 
           }),
-          location: evento.ubicacion || 'Por confirmar',
+          dateRaw: new Date(evento.fecha), // Guardamos la fecha original para ordenar
+          location: evento.lugar || 'Por confirmar',
           image: null,
-          availableTickets: (evento.aforoMaximo || 100) - (evento.entradasVendidas || 0),
+          availableTickets: 100, // Valor por defecto ya que la API no tiene aforo
+          totalRecaudado: evento.totalRecaudado || 0,
         }));
         
         setEventos(transformedEvents);
         console.log(`Cargados ${transformedEvents.length} eventos desde el backend`);
       } catch (err) {
         console.error('Error al cargar eventos:', err);
-        setError('No se pudo conectar con el backend. Mostrando eventos de ejemplo.');
-        // Fallback a datos mock si falla
-        setEventos(mockEvents);
+        setError('No se pudo conectar con el backend. Por favor, verifica que el servidor esté ejecutándose en http://localhost:8080');
+        setEventos([]);
       } finally {
         setLoading(false);
       }
@@ -205,7 +90,8 @@ const Events = () => {
         return a.title.localeCompare(b.title);
       case 'date':
       default:
-        return 0;
+        // Ordenar por fecha (más próximos primero)
+        return a.dateRaw - b.dateRaw;
     }
   });
 

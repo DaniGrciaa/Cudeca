@@ -107,5 +107,11 @@ public class EventoController {
         List<EventoResponse> responses = eventoService.filtrarEventos(filtros);
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<EventoResponse>> getEventosByTipo(@PathVariable String tipo) {
+        List<EventoResponse> responses = eventoService.getEventosByTipo(tipo);
+        return ResponseEntity.ok(responses);
+    }
 }
 

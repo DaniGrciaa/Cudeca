@@ -1,6 +1,7 @@
 package com.cudeca.cudecabe.repository;
 
 import com.cudeca.cudecabe.model.Evento;
+import com.cudeca.cudecabe.model.TipoEvento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,11 +23,13 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     List<Evento> findByFechaBefore(LocalDate fecha);
     List<Evento> findByTotalRecaudadoGreaterThanEqual(BigDecimal minRecaudacion);
     List<Evento> findByTotalRecaudadoBetween(BigDecimal min, BigDecimal max);
+    List<Evento> findByTipo(TipoEvento tipo);
 
     // Query personalizada para filtros combinados
     @Query("SELECT e FROM Evento e WHERE " +
            "(:nombre IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))) AND " +
            "(:lugar IS NULL OR LOWER(e.lugar) LIKE LOWER(CONCAT('%', :lugar, '%'))) AND " +
+           "(:tipo IS NULL OR e.tipo = :tipo) AND " +
            "(:fechaDesde IS NULL OR e.fecha >= :fechaDesde) AND " +
            "(:fechaHasta IS NULL OR e.fecha <= :fechaHasta) AND " +
            "(:recaudacionMin IS NULL OR e.totalRecaudado >= :recaudacionMin) AND " +
@@ -34,6 +37,7 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     List<Evento> findByFiltros(
         @Param("nombre") String nombre,
         @Param("lugar") String lugar,
+        @Param("tipo") TipoEvento tipo,
         @Param("fechaDesde") LocalDate fechaDesde,
         @Param("fechaHasta") LocalDate fechaHasta,
         @Param("recaudacionMin") BigDecimal recaudacionMin,

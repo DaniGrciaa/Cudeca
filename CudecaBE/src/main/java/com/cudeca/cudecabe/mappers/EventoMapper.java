@@ -17,6 +17,8 @@ public class EventoMapper {
         evento.setFecha(request.getFecha() != null ? request.getFecha() : LocalDate.now());
         evento.setDescripcion(request.getDescripcion());
         evento.setLugar(request.getLugar());
+        evento.setTipo(request.getTipo());
+        evento.setPrecio(request.getPrecio() != null ? request.getPrecio() : BigDecimal.ZERO);
         evento.setTotalRecaudado(request.getTotalRecaudado() != null ? request.getTotalRecaudado() : BigDecimal.ZERO);
         return evento;
     }
@@ -28,6 +30,8 @@ public class EventoMapper {
         response.setFecha(evento.getFecha());
         response.setDescripcion(evento.getDescripcion());
         response.setLugar(evento.getLugar());
+        response.setTipo(evento.getTipo());
+        response.setPrecio(evento.getPrecio());
         response.setTotalRecaudado(evento.getTotalRecaudado());
         return response;
     }
@@ -44,6 +48,12 @@ public class EventoMapper {
         }
         if (request.getLugar() != null) {
             evento.setLugar(request.getLugar());
+        }
+        if (request.getTipo() != null) {
+            evento.setTipo(request.getTipo());
+        }
+        if (request.getPrecio() != null) {
+            evento.setPrecio(request.getPrecio());
         }
         if (request.getTotalRecaudado() != null) {
             evento.setTotalRecaudado(request.getTotalRecaudado());

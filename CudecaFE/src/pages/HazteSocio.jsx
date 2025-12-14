@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heart, CreditCard, Mail, MapPin, User, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usuariosAPI } from '../services/api';
 
 const HazteSocio = () => {
   const navigate = useNavigate();
@@ -47,32 +48,30 @@ const HazteSocio = () => {
     }
     
     try {
-      console.log('Intentando registrar usuario con:', {
-        email: formData.email,
+      // Preparar datos según lo que espera el backend
+      const datosParaBackend = {
         nombre: formData.nombre,
-        apellidos: formData.apellidos
-      });
-      
-      // Registrar el usuario y automáticamente iniciar sesión
-      await register({
-        nombre: formData.nombre,
-        apellidos: formData.apellidos,
         email: formData.email,
+        telefono: formData.telefono || '',
+        username: formData.email, // Usamos el email como username
         password: formData.password,
-        telefono: formData.telefono || null,
-        direccion: formData.direccion || null,
-        ciudad: formData.ciudad || null,
-        codigoPostal: formData.codigoPostal || null,
-        donacionMensual: formData.donacionMensual,
-        metodoPago: formData.metodoPago,
-      });
+        rol: 'USER' // Rol por defecto para socios (valores permitidos: ADMIN, USER, ORGANIZADOR, PATROCINADOR)
+      };
+
+      console.log('Enviando datos al backend:', datosParaBackend);
+      
+      // Crear el usuario en el backend
+      const nuevoUsuario = await usuariosAPI.create(datosParaBackend);
+      
+      console.log('Usuario creado exitosamente:', nuevoUsuario);
       
       alert('¡Gracias por hacerte socio de Cudeca! Tu cuenta ha sido creada exitosamente.');
       
-      // Redirigir al perfil
-      navigate('/perfil');
+      // Redirigir al login
+      navigate('/login');
+      
     } catch (err) {
-      console.error('Error completo al enviar formulario:', err);
+      console.error('Error al crear usuario:', err);
       const errorMessage = err.message || 'Hubo un error al procesar tu solicitud';
       alert(`Error: ${errorMessage}\n\nPor favor, verifica que el email no esté ya registrado e inténtalo de nuevo.`);
     }

@@ -2,42 +2,15 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, CreditCard, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const Carrito = () => {
-  // Mock cart items - en producción vendría del store
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      title: 'Cena Benéfica de Gala',
-      price: 75.00,
-      quantity: 2,
-      date: '15 de Diciembre, 2025',
-      location: 'Hotel Vincci Selección Aleysa, Benalmádena'
-    },
-    {
-      id: 2,
-      title: 'Cena Solidaria De Primavera',
-      price: 65.00,
-      quantity: 1,
-      date: '5 de Abril, 2026',
-      location: 'Hotel Alay, Benalmádena'
-    }
-  ]);
-
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('existing');
   const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return;
-    setCartItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
   const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    removeFromCart(id);
   };
 
   const calculateSubtotal = () => {
@@ -79,7 +52,7 @@ const Carrito = () => {
       }
       
       alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
-      setCartItems([]); // Vaciar carrito
+      clearCart(); // Vaciar carrito
     } catch (err) {
       console.error('Error al procesar pago:', err);
       alert('Hubo un error al procesar tu pago. Por favor, inténtalo de nuevo.');
