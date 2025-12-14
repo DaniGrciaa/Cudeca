@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/rifas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class RifaController {
 
     private final RifaService rifaService;

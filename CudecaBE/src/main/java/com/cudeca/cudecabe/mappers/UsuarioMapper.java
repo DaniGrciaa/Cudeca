@@ -25,6 +25,7 @@ public class UsuarioMapper {
         response.setNombre(usuario.getNombre());
         response.setEmail(usuario.getEmail());
         response.setTelefono(usuario.getTelefono());
+        response.setDireccion(usuario.getDireccion());
         response.setUsername(usuario.getUsername());
         response.setRol(usuario.getRol());
         return response;
@@ -40,12 +41,13 @@ public class UsuarioMapper {
         if (request.getTelefono() != null) {
             usuario.setTelefono(request.getTelefono());
         }
+        if (request.getDireccion() != null) {
+            usuario.setDireccion(request.getDireccion());
+        }
         if (request.getUsername() != null) {
             usuario.setUsername(request.getUsername());
         }
-        if (request.getPassword() != null) {
-            usuario.setPassword(request.getPassword());
-        }
+        // La contraseña se maneja en el servicio con encriptación
         if (request.getRol() != null) {
             usuario.setRol(request.getRol());
         }

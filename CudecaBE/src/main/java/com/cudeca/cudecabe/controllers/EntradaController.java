@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/entradas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class EntradaController {
 
     private final EntradaService entradaService;

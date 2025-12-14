@@ -70,33 +70,31 @@ const Perfil = () => {
     );
   }
 
-  const userId = user?.id;
-
   useEffect(() => {
-    if (!userId) return;
+    if (!user) return;
     
     const fetchUserData = async () => {
       try {
         setLoading(true);
         
-        // Obtener datos del usuario
-        const userData = await usuariosAPI.getById(userId);
-        
+        // Usar datos del usuario del contexto
         const transformedProfile = {
-          nombre: userData.nombre || 'Sin nombre',
-          email: userData.email,
-          ciudad: 'No especificada',
-          socio: 'Sí - Socio de Cudeca',
-          telefono: userData.telefono || 'No especificado',
-          direccion: 'No especificada',
-          codigoPostal: 'No especificado'
+          nombre: user.nombre || user.username || 'Sin nombre',
+          email: user.email,
+          ciudad: '',
+          socio: user.rol === 'SOCIO' ? 'Sí - Socio de Cudeca' : 'Usuario registrado',
+          telefono: user.telefono || 'No especificado',
+          direccion: user.direccion || 'No especificada',
+          codigoPostal: ''
         };
         
         setProfileData(transformedProfile);
         setEditData(transformedProfile);
         
-        // Obtener historial de compras del usuario
-        const compras = await comprasAPI.getByUsuarioId(userId);
+        // Por ahora, usar compras mock ya que no tenemos el userId en el backend
+        // TODO: Cuando el backend devuelva el userId en el login, descomentar esto:
+        // const compras = await comprasAPI.getByUsuarioId(user.id);
+        const compras = [];
         
         const transformedDonaciones = compras.map(compra => ({
           id: compra.id,
@@ -119,7 +117,7 @@ const Perfil = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [user]);
 
   const totalDonado = donaciones.reduce((sum, d) => sum + d.cantidad, 0);
 

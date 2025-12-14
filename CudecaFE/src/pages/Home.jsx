@@ -99,16 +99,18 @@ const Home = () => {
           id: evento.id,
           title: evento.nombre,
           description: evento.descripcion || 'Evento solidario de Cudeca',
-          type: evento.tipoEvento?.toLowerCase() || 'cena',
+          type: evento.tipo ? evento.tipo.toLowerCase() : 'cena',
           price: evento.precio || 0,
           date: new Date(evento.fecha).toLocaleDateString('es-ES', { 
             day: 'numeric', 
             month: 'long', 
             year: 'numeric' 
           }),
-          location: evento.ubicacion || 'Por confirmar',
+          dateRaw: new Date(evento.fecha),
+          location: evento.lugar || 'Por confirmar',
           image: null,
-          availableTickets: (evento.aforoMaximo || 100) - (evento.entradasVendidas || 0),
+          availableTickets: 100,
+          totalRecaudado: evento.totalRecaudado || 0,
         }));
         
         setEventos(transformedEvents);

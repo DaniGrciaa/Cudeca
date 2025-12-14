@@ -1,14 +1,25 @@
 // API Base URL
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Obtener token del localStorage
+const getAuthToken = () => {
+  return localStorage.getItem('cudeca_token');
+};
+
 // API Client con configuración básica
 const apiClient = {
   get: async (endpoint) => {
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     
     if (!response.ok) {
@@ -19,11 +30,17 @@ const apiClient = {
   },
 
   post: async (endpoint, data) => {
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(data),
     });
     
@@ -35,11 +52,17 @@ const apiClient = {
   },
 
   put: async (endpoint, data) => {
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(data),
     });
     
@@ -51,11 +74,17 @@ const apiClient = {
   },
 
   delete: async (endpoint) => {
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     
     if (!response.ok) {
@@ -63,6 +92,25 @@ const apiClient = {
     }
     
     return response.ok;
+  },
+};
+
+// Auth API
+export const authAPI = {
+  login: async (email, password) => {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
   },
 };
 
@@ -89,6 +137,7 @@ export const usuariosAPI = {
 export const comprasAPI = {
   getAll: () => apiClient.get('/compras'),
   getById: (id) => apiClient.get(`/compras/${id}`),
+  getByUsuarioId: (usuarioId) => apiClient.get(`/compras/usuario/${usuarioId}`),
   create: (data) => apiClient.post('/compras', data),
   update: (id, data) => apiClient.put(`/compras/${id}`, data),
   delete: (id) => apiClient.delete(`/compras/${id}`),

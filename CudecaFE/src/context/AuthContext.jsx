@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { usuariosAPI } from '../services/api';
+import { authAPI, usuariosAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -8,9 +8,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si hay un usuario guardado en localStorage
+    // Verificar si hay un token y usuario guardados en localStorage
     const savedUser = localStorage.getItem('cudeca_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('cudeca_token');
+    if (savedUser && savedToken) {
       setUser(JSON.parse(savedUser));
     }
     setLoading(false);
@@ -18,32 +19,66 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Obtener todos los usuarios y buscar por email
-      const usuarios = await usuariosAPI.getAll();
-      const usuario = usuarios.find(u => u.email === email);
+      // Llamar al endpoint de autenticación
+      const response = await authAPI.login(email, password);
       
-      if (!usuario) {
-        throw new Error('Usuario no encontrado');
+      if (!response.token) {
+        throw new Error('Token no recibido del servidor');
       }
 
-      // Por ahora no validamos contraseña (implementación básica)
-      // En producción debería validarse en el backend
+      // Guardar el token primero para que las siguientes peticiones lo usen
+      localStorage.setItem('cudeca_token', response.token);
       
+      console.log('Token guardado, obteniendo datos completos del usuario...');
+      
+      // Obtener todos los usuarios y buscar el actual por email para tener datos completos
+      try {
+        const usuarios = await usuariosAPI.getAll();
+        console.log('Usuarios obtenidos:', usuarios);
+        
+        const usuarioCompleto = usuarios.find(u => u.email === email);
+        console.log('Usuario completo encontrado:', usuarioCompleto);
+        
+        if (usuarioCompleto) {
+          const userData = {
+            id: usuarioCompleto.id,
+            username: usuarioCompleto.username || response.username,
+            email: usuarioCompleto.email,
+            nombre: usuarioCompleto.nombre || response.username,
+            telefono: usuarioCompleto.telefono,
+            direccion: usuarioCompleto.direccion,
+            rol: response.rol,
+            esSocio: response.rol === 'SOCIO',
+          };
+          
+          setUser(userData);
+          localStorage.setItem('cudeca_user', JSON.stringify(userData));
+          
+          console.log('Login exitoso con datos completos:', userData);
+          return userData;
+        }
+      } catch (err) {
+        console.error('Error al obtener datos completos del usuario:', err);
+      }
+      
+      // Si falla la obtención de datos completos, usar solo los del login
       const userData = {
-        id: usuario.id,
-        nombre: usuario.nombre,
-        apellidos: '',
-        email: usuario.email,
-        esSocio: true,
+        username: response.username,
+        email: response.email,
+        nombre: response.username || email.split('@')[0],
+        rol: response.rol,
+        esSocio: response.rol === 'SOCIO',
       };
 
       setUser(userData);
       localStorage.setItem('cudeca_user', JSON.stringify(userData));
       
+      console.log('Login exitoso con datos básicos:', userData);
+      
       return userData;
     } catch (error) {
       console.error('Error en login:', error);
-      throw error;
+      throw new Error('Email o contraseña incorrectos');
     }
   };
 
@@ -58,6 +93,7 @@ export const AuthProvider = ({ children }) => {
         nombre: userData.nombre + (userData.apellidos ? ' ' + userData.apellidos : ''),
         email: userData.email,
         telefono: userData.telefono || null,
+        direccion: userData.direccion || null,
         username: username,
         password: userData.password,
         rol: 'SOCIO'
@@ -110,6 +146,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('cudeca_user');
+    localStorage.removeItem('cudeca_token');
   };
 
   const value = {

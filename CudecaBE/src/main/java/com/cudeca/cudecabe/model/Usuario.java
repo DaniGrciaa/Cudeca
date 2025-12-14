@@ -39,6 +39,10 @@ public class Usuario {
     @Column(name = "telefono", length = 20)
     private String telefono;
 
+    @Size(max = 255)
+    @Column(name = "direccion", length = 255)
+    private String direccion;
+
     @Size(max = 200)
     @NotNull
     @Column(name = "password", nullable = false, length = 200)

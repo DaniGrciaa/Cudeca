@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/patrocinadores")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class PatrocinadorController {
 
     private final PatrocinadorService patrocinadorService;

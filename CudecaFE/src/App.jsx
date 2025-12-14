@@ -12,7 +12,6 @@ import AboutUs from './pages/AboutUs';
 import HazteSocio from './pages/HazteSocio';
 import Carrito from './pages/Carrito';
 import Perfil from './pages/Perfil';
-import Voluntariado from './pages/Voluntariado';
 import Login from './pages/Login';
 
 function App() {
@@ -29,7 +28,6 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/voluntariado" element={<Voluntariado />} />
                 <Route path="/hazte-socio" element={<HazteSocio />} />
                 <Route path="/carrito" element={<Carrito />} />
                 <Route path="/perfil" element={<Perfil />} />

@@ -7,6 +7,7 @@ import com.cudeca.cudecabe.model.Usuario;
 import com.cudeca.cudecabe.repository.UserRepository;
 import com.cudeca.cudecabe.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -34,6 +36,8 @@ public class UserServiceImpl implements UserService {
         }
 
         Usuario usuario = usuarioMapper.toEntity(request);
+        // Encriptar la contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         Usuario savedUsuario = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(savedUsuario);
     }
@@ -75,6 +79,12 @@ public class UserServiceImpl implements UserService {
         }
 
         usuarioMapper.updateEntity(request, usuario);
+
+        // Encriptar la contraseña si se está actualizando
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
         Usuario updatedUsuario = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(updatedUsuario);
     }

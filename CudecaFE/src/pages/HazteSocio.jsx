@@ -67,8 +67,8 @@ const HazteSocio = () => {
       
       alert('¡Gracias por hacerte socio de Cudeca! Tu cuenta ha sido creada exitosamente.');
       
-      // Redirigir al login
-      navigate('/login');
+      // Redirigir al perfil ya que el usuario está autenticado automáticamente
+      navigate('/perfil');
       
     } catch (err) {
       console.error('Error al crear usuario:', err);
