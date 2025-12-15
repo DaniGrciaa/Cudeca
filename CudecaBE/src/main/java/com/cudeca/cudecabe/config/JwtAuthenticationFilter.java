@@ -41,6 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt); // En realidad extrae el email
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                logger.warn("Token JWT expirado. Se requiere refrescar el token.");
+                // No establecer autenticación, permitir que el filtro continúe
+                // El frontend recibirá 401 y deberá usar el refresh token
             } catch (Exception e) {
                 logger.error("Error extrayendo email del token JWT", e);
             }

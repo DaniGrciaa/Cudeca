@@ -64,14 +64,19 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#volunteer" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-lg">
-                  Voluntariado
-                </a>
+                <Link to="/donar" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-lg">
+                  Donar
+                </Link>
               </li>
               <li>
-                <a href="#member" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-lg">
+                <Link to="/about-us" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-lg">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/hazte-socio" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-lg">
                   Hazte Socio
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -109,15 +114,15 @@ const Footer = () => {
               © {currentYear} Fundación Cudeca. Todos los derechos reservados.
             </p>
             <div className="flex gap-6">
-              <a href="#privacy" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
+              <Link to="/privacidad" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
                 Política de Privacidad
-              </a>
-              <a href="#terms" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
+              </Link>
+              <Link to="/terminos" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
                 Términos y Condiciones
-              </a>
-              <a href="#cookies" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
+              </Link>
+              <Link to="/cookies" className="text-gray-400 hover:text-cudeca-yellow transition-colors text-base">
                 Cookies
-              </a>
+              </Link>
             </div>
           </div>
         </div>

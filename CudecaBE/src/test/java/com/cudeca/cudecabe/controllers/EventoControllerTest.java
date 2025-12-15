@@ -49,7 +49,7 @@ class EventoControllerTest {
         eventoRequest.setFecha(LocalDate.of(2025, 12, 15));
         eventoRequest.setDescripcion("Concierto para recaudar fondos");
         eventoRequest.setLugar("Teatro Principal");
-        eventoRequest.setTipo(com.cudeca.cudecabe.model.TipoEvento.CONCIERTO);
+        eventoRequest.setTipo(com.cudeca.cudecabe.model.TipoEvento.CULTURAL);
         eventoRequest.setPrecio(new BigDecimal("50.00"));
 
         eventoResponse = new EventoResponse();
@@ -58,7 +58,7 @@ class EventoControllerTest {
         eventoResponse.setFecha(LocalDate.of(2025, 12, 15));
         eventoResponse.setDescripcion("Concierto para recaudar fondos");
         eventoResponse.setLugar("Teatro Principal");
-        eventoResponse.setTipo(com.cudeca.cudecabe.model.TipoEvento.CONCIERTO);
+        eventoResponse.setTipo(com.cudeca.cudecabe.model.TipoEvento.CULTURAL);
         eventoResponse.setPrecio(new BigDecimal("50.00"));
         eventoResponse.setTotalRecaudado(BigDecimal.ZERO);
     }

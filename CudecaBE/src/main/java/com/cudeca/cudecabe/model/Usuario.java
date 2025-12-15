@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -20,12 +23,6 @@ public class Usuario {
 
     @Size(max = 100)
     @NotNull
-    @Column(name = "username", nullable = false, length = 100)
-    private String username;
-
-
-    @Size(max = 100)
-    @NotNull
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
@@ -34,14 +31,9 @@ public class Usuario {
     @Column(name = "email", nullable = false, length = 150)
     private String email;
 
-    @Getter
     @Size(max = 20)
     @Column(name = "telefono", length = 20)
     private String telefono;
-
-    @Size(max = 255)
-    @Column(name = "direccion", length = 255)
-    private String direccion;
 
     @Size(max = 200)
     @NotNull
@@ -53,5 +45,12 @@ public class Usuario {
     @Column(name = "rol", length = 50)
     private String rol;
 
+    @NotNull
+    @ColumnDefault("0.00")
+    @Column(name = "cantidad_donada", nullable = false, precision = 10, scale = 2)
+    private BigDecimal cantidadDonada;
 
+    // Relación con Direccion (un usuario puede tener múltiples direcciones)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Direccion> direcciones;
 }

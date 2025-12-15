@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +31,6 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        // Validar que el username no exista
-        if (usuarioRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("El username ya está registrado");
-        }
 
         Usuario usuario = usuarioMapper.toEntity(request);
         // Encriptar la contraseña antes de guardar
@@ -71,12 +68,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // Validar username si se está cambiando
-        if (request.getUsername() != null && !request.getUsername().equals(usuario.getUsername())) {
-            if (usuarioRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException("El username ya está registrado");
-            }
-        }
 
         usuarioMapper.updateEntity(request, usuario);
 
@@ -106,13 +97,6 @@ public class UserServiceImpl implements UserService {
         return usuarioMapper.toResponse(usuario);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public UsuarioResponse obtenerUsuarioPorUsername(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
-        return usuarioMapper.toResponse(usuario);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -128,5 +112,23 @@ public class UserServiceImpl implements UserService {
         return usuarioRepository.findByNombreContainingIgnoreCase(nombre).stream()
                 .map(usuarioMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse incrementarDonacion(Integer id, BigDecimal cantidad) {
+        if (cantidad == null || cantidad.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("La cantidad a donar debe ser mayor a cero");
+        }
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+
+        BigDecimal cantidadActual = usuario.getCantidadDonada() != null ?
+                usuario.getCantidadDonada() : BigDecimal.ZERO;
+        usuario.setCantidadDonada(cantidadActual.add(cantidad));
+
+        Usuario updatedUsuario = usuarioRepository.save(usuario);
+        return usuarioMapper.toResponse(updatedUsuario);
     }
 }

@@ -11,17 +11,23 @@ const EventCard = ({ event }) => {
   };
 
   const eventTypeColors = {
-    cena: 'bg-green-100 text-green-800',
-    concierto: 'bg-green-100 text-green-800',
-    marcha: 'bg-green-100 text-green-800',
-    rifa: 'bg-green-100 text-green-800',
+    gastronomico: 'bg-green-100 text-green-800',
+    cultural: 'bg-blue-100 text-blue-800',
+    deportivo: 'bg-orange-100 text-orange-800',
+    sorteo: 'bg-yellow-100 text-yellow-800',
+    taller: 'bg-purple-100 text-purple-800',
+    mercadillo: 'bg-pink-100 text-pink-800',
+    otros: 'bg-gray-100 text-gray-800',
   };
 
   const eventTypeImages = {
-    cena: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop',
-    concierto: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=300&fit=crop',
-    marcha: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=400&h=300&fit=crop',
-    rifa: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=300&fit=crop'
+    gastronomico: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1600&h=400&fit=crop',
+    cultural: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8dG9tb3Jyb3dsYW5kfGVufDB8fDB8fHww',
+    deportivo: 'https://plus.unsplash.com/premium_photo-1664537975122-9c598d85816e?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    sorteo: 'https://plus.unsplash.com/premium_photo-1661940814738-5a028d647d3a?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3ViYXN0YXxlbnwwfHwwfHx8MA%3D%3D',
+    taller: 'https://images.unsplash.com/photo-1623652554515-91c833e3080e?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGFsbGVyfGVufDB8fDB8fHww',
+    mercadillo: 'https://images.unsplash.com/photo-1597668900045-b9283c0de174?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWVyY2FkaWxsb3xlbnwwfHwwfHx8MA%3D%3D',
+    otros: 'https://images.unsplash.com/photo-1513682121497-80211f36a7d3?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVvcGxlfGVufDB8fDB8fHww'
   };
 
   return (
@@ -35,7 +41,7 @@ const EventCard = ({ event }) => {
       {/* Imagen del evento */}
       <div className="relative h-48 overflow-hidden bg-gray-200">
         <img
-          src={event.image || eventTypeImages[event.type] || eventTypeImages.cena}
+          src={event.image || eventTypeImages[event.type] || eventTypeImages.otros}
           alt={event.title}
           className="w-full h-full object-cover"
         />

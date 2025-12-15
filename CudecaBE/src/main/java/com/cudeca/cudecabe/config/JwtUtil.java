@@ -25,6 +25,10 @@ public class JwtUtil {
     @Value("${jwt.expiration:36000000}")
     private Long expiration;
 
+    // Tiempo de expiración del refresh token en milisegundos (por defecto 7 días)
+    @Value("${jwt.refresh.expiration:604800000}")
+    private Long refreshExpiration;
+
     /**
      * Genera la clave secreta para firmar los tokens
      */
@@ -120,6 +124,49 @@ public class JwtUtil {
             return !isTokenExpired(token);
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * Genera un refresh token JWT para un usuario
+     */
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return createRefreshToken(claims, userDetails.getUsername());
+    }
+
+    /**
+     * Crea el refresh token JWT con mayor duración
+     */
+    private String createRefreshToken(Map<String, Object> claims, String subject) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + refreshExpiration);
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(now)
+                .expiration(expirationDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
+     * Valida el refresh token
+     */
+    public Boolean validateRefreshToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    /**
+     * Verifica si el token ha expirado sin lanzar excepción
+     */
+    public Boolean isExpired(String token) {
+        try {
+            return isTokenExpired(token);
+        } catch (Exception e) {
+            return true;
         }
     }
 }

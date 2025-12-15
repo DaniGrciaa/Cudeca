@@ -13,6 +13,10 @@ import HazteSocio from './pages/HazteSocio';
 import Carrito from './pages/Carrito';
 import Perfil from './pages/Perfil';
 import Login from './pages/Login';
+import Donar from './pages/Donar';
+import Privacidad from './pages/Privacidad';
+import Terminos from './pages/Terminos';
+import Cookies from './pages/Cookies';
 
 function App() {
   return (
@@ -27,6 +31,7 @@ function App() {
                 <Route path="/eventos" element={<Events />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/donar" element={<Donar />} />
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/hazte-socio" element={<HazteSocio />} />
                 <Route path="/carrito" element={<Carrito />} />
@@ -34,6 +39,9 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/thank-you" element={<ThankYou />} />
+                <Route path="/privacidad" element={<Privacidad />} />
+                <Route path="/terminos" element={<Terminos />} />
+                <Route path="/cookies" element={<Cookies />} />
               </Routes>
             </main>
             <Footer />

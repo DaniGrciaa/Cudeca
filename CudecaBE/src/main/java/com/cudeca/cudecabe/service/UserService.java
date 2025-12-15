@@ -3,6 +3,7 @@ package com.cudeca.cudecabe.service;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserService {
@@ -12,7 +13,7 @@ public interface UserService {
     UsuarioResponse actualizarUsuario(Integer id, UsuarioRequest request);
     void eliminarUsuario(Integer id);
     UsuarioResponse obtenerUsuarioPorEmail(String email);
-    UsuarioResponse obtenerUsuarioPorUsername(String username);
     List<UsuarioResponse> obtenerUsuariosPorRol(String rol);
     List<UsuarioResponse> buscarUsuariosPorNombre(String nombre);
+    UsuarioResponse incrementarDonacion(Integer id, BigDecimal cantidad);
 }

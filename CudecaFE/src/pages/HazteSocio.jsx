@@ -13,22 +13,41 @@ const HazteSocio = () => {
     apellidos: '',
     email: '',
     password: '',
-    direccion: '',
-    ciudad: '',
-    codigoPostal: '',
     telefono: '',
     metodoPago: 'tarjeta',
-    donacionMensual: 15
+    donacionMensual: 15,
+    direccion: {
+      calle: '',
+      numero: '',
+      piso: '',
+      puerta: '',
+      codigoPostal: '',
+      ciudad: '',
+      provincia: '',
+      pais: 'España'
+    }
   });
 
   const donationOptions = [0, 5, 10, 15, 25, 50];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Si el campo pertenece a la dirección
+    if (['calle', 'numero', 'piso', 'puerta', 'codigoPostal', 'ciudad', 'provincia', 'pais'].includes(name)) {
+      setFormData(prev => ({
+        ...prev,
+        direccion: {
+          ...prev.direccion,
+          [name]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleDonationChange = (amount) => {
@@ -41,33 +60,65 @@ const HazteSocio = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar que la contraseña tenga al menos 6 caracteres
-    if (formData.password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
+    // Validar que la contraseña tenga al menos 8 caracteres (requisito del backend)
+    if (formData.password.length < 8) {
+      alert('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    
+    // Validar el teléfono si se proporciona (debe tener 9 dígitos)
+    if (formData.telefono && !/^[0-9]{9}$/.test(formData.telefono.replace(/\s/g, ''))) {
+      alert('El teléfono debe tener 9 dígitos');
       return;
     }
     
     try {
-      // Preparar datos según lo que espera el backend
+      // Verificar si hay datos de dirección
+      const tieneDireccion = formData.direccion.calle || 
+                            formData.direccion.numero || 
+                            formData.direccion.ciudad || 
+                            formData.direccion.codigoPostal;
+      
+      // Preparar el objeto de dirección solo si hay datos
+      let direccionParaEnviar = null;
+      if (tieneDireccion) {
+        direccionParaEnviar = {};
+        if (formData.direccion.calle) direccionParaEnviar.calle = formData.direccion.calle;
+        if (formData.direccion.numero) direccionParaEnviar.numero = formData.direccion.numero;
+        if (formData.direccion.piso) direccionParaEnviar.piso = formData.direccion.piso;
+        if (formData.direccion.puerta) direccionParaEnviar.puerta = formData.direccion.puerta;
+        if (formData.direccion.codigoPostal) direccionParaEnviar.codigoPostal = formData.direccion.codigoPostal;
+        if (formData.direccion.ciudad) direccionParaEnviar.ciudad = formData.direccion.ciudad;
+        if (formData.direccion.provincia) direccionParaEnviar.provincia = formData.direccion.provincia;
+        if (formData.direccion.pais) direccionParaEnviar.pais = formData.direccion.pais;
+      }
+      
+      // Preparar nombre completo
+      const nombreCompleto = formData.apellidos 
+        ? `${formData.nombre} ${formData.apellidos}`
+        : formData.nombre;
+      
+      // Preparar datos según lo que espera el backend (UsuarioRequest)
       const datosParaBackend = {
-        nombre: formData.nombre,
+        nombre: nombreCompleto,
         email: formData.email,
-        telefono: formData.telefono || '',
-        username: formData.email, // Usamos el email como username
         password: formData.password,
-        rol: 'USER' // Rol por defecto para socios (valores permitidos: ADMIN, USER, ORGANIZADOR, PATROCINADOR)
+        telefono: formData.telefono ? formData.telefono.replace(/\s/g, '') : null,
+        rol: 'SOCIO',
+        cantidadDonada: formData.donacionMensual || 0,
+        direcciones: direccionParaEnviar ? [direccionParaEnviar] : []
       };
 
       console.log('Enviando datos al backend:', datosParaBackend);
       
-      // Crear el usuario en el backend
-      const nuevoUsuario = await usuariosAPI.create(datosParaBackend);
+      // Registrar el usuario usando el método register del contexto
+      await register(datosParaBackend);
       
-      console.log('Usuario creado exitosamente:', nuevoUsuario);
+      console.log('Usuario registrado exitosamente');
       
       alert('¡Gracias por hacerte socio de Cudeca! Tu cuenta ha sido creada exitosamente.');
       
-      // Redirigir al perfil ya que el usuario está autenticado automáticamente
+      // Redirigir al perfil
       navigate('/perfil');
       
     } catch (err) {
@@ -192,17 +243,20 @@ const HazteSocio = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    minLength="6"
+                    minLength="8"
                     className="input-field"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                   />
                 </div>
               </div>
 
               <div className="mt-6">
                 <label htmlFor="telefono" className="block text-lg font-semibold text-gray-900 mb-2">
-                  Número de Contacto
+                  Número de Contacto (Opcional)
                 </label>
+                <p className="text-sm text-gray-600 mb-2">
+                  Debe tener 9 dígitos sin espacios
+                </p>
                 <input
                   type="tel"
                   id="telefono"
@@ -210,7 +264,9 @@ const HazteSocio = () => {
                   value={formData.telefono}
                   onChange={handleChange}
                   className="input-field"
-                  placeholder="+34 600 000 000"
+                  placeholder="600000000"
+                  pattern="[0-9]{9}"
+                  maxLength="9"
                 />
               </div>
             </div>
@@ -219,42 +275,83 @@ const HazteSocio = () => {
             <div className="pt-6 border-t border-gray-200">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                 <MapPin className="w-7 h-7 text-cudeca-darkGreen" aria-hidden="true" />
-                Dirección
+                Dirección (Opcional)
               </h2>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                La dirección es opcional pero recomendada para poder enviarte información y certificados.
+              </p>
 
               <div className="space-y-6">
-                <div>
-                  <label htmlFor="direccion" className="block text-lg font-semibold text-gray-900 mb-2">
-                    Dirección Completa
-                  </label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleChange}
-                    required
-                    className="input-field"
-                    placeholder="Calle, número, piso, puerta"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="ciudad" className="block text-lg font-semibold text-gray-900 mb-2">
-                      Ciudad
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <label htmlFor="calle" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Calle
                     </label>
                     <input
                       type="text"
-                      id="ciudad"
-                      name="ciudad"
-                      value={formData.ciudad}
+                      id="calle"
+                      name="calle"
+                      value={formData.direccion.calle}
                       onChange={handleChange}
                       className="input-field"
-                      placeholder="Tu ciudad"
+                      placeholder="Nombre de la calle"
+                      maxLength="200"
                     />
                   </div>
+                  
+                  <div>
+                    <label htmlFor="numero" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Número
+                    </label>
+                    <input
+                      type="text"
+                      id="numero"
+                      name="numero"
+                      value={formData.direccion.numero}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Nº"
+                      maxLength="50"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="piso" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Piso
+                    </label>
+                    <input
+                      type="text"
+                      id="piso"
+                      name="piso"
+                      value={formData.direccion.piso}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Ej: 3º"
+                      maxLength="10"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="puerta" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Puerta
+                    </label>
+                    <input
+                      type="text"
+                      id="puerta"
+                      name="puerta"
+                      value={formData.direccion.puerta}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Ej: A"
+                      maxLength="10"
+                    />
+                  </div>
+                </div>
 
+                <div className="grid md:grid-cols-3 gap-6">
                   <div>
                     <label htmlFor="codigoPostal" className="block text-lg font-semibold text-gray-900 mb-2">
                       Código Postal
@@ -263,12 +360,61 @@ const HazteSocio = () => {
                       type="text"
                       id="codigoPostal"
                       name="codigoPostal"
-                      value={formData.codigoPostal}
+                      value={formData.direccion.codigoPostal}
                       onChange={handleChange}
                       className="input-field"
                       placeholder="29000"
+                      maxLength="10"
                     />
                   </div>
+                  
+                  <div>
+                    <label htmlFor="ciudad" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Ciudad
+                    </label>
+                    <input
+                      type="text"
+                      id="ciudad"
+                      name="ciudad"
+                      value={formData.direccion.ciudad}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Tu ciudad"
+                      maxLength="100"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="provincia" className="block text-lg font-semibold text-gray-900 mb-2">
+                      Provincia
+                    </label>
+                    <input
+                      type="text"
+                      id="provincia"
+                      name="provincia"
+                      value={formData.direccion.provincia}
+                      onChange={handleChange}
+                      className="input-field"
+                      placeholder="Tu provincia"
+                      maxLength="100"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="pais" className="block text-lg font-semibold text-gray-900 mb-2">
+                    País
+                  </label>
+                  <input
+                    type="text"
+                    id="pais"
+                    name="pais"
+                    value={formData.direccion.pais}
+                    onChange={handleChange}
+                    className="input-field"
+                    placeholder="España"
+                    maxLength="100"
+                  />
                 </div>
               </div>
             </div>

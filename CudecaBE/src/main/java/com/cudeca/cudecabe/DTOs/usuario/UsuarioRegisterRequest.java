@@ -3,37 +3,33 @@ package com.cudeca.cudecabe.DTOs.usuario;
 import com.cudeca.cudecabe.DTOs.direccion.DireccionRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Data
-public class UsuarioRequest {
+public class UsuarioRegisterRequest {
 
-    @NotBlank(message = "El nombre no puede estar vacío")
+    @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")
     private String nombre;
+
+    @Size(max = 100, message = "Los apellidos no pueden exceder 100 caracteres")
+    private String apellidos;
 
     @Email(message = "El email debe ser válido")
     @NotBlank(message = "El email es obligatorio")
     @Size(max = 150, message = "El email no puede exceder 150 caracteres")
     private String email;
 
-    @Size(max = 20, message = "El teléfono no puede exceder 20 caracteres")
+    @Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener 9 dígitos")
     private String telefono;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 4, max = 200, message = "La contraseña debe tener entre 4 y 200 caracteres")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
-    @Size(max = 50, message = "El rol no puede exceder 50 caracteres")
-    private String rol;
-
-    // Cantidad total donada por el usuario
-    private BigDecimal cantidadDonada;
-
-    // Lista de direcciones del usuario
-    private List<DireccionRequest> direcciones;
+    // Datos de dirección (opcionales pero recomendados)
+    private DireccionRequest direccion;
 }
+

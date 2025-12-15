@@ -56,11 +56,6 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/username/{username}")
-    public ResponseEntity<UsuarioResponse> obtenerUsuarioPorUsername(@PathVariable String username) {
-        UsuarioResponse response = usuarioService.obtenerUsuarioPorUsername(username);
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/rol/{rol}")
     public ResponseEntity<List<UsuarioResponse>> obtenerUsuariosPorRol(@PathVariable String rol) {
@@ -72,5 +67,13 @@ public class UsuarioController {
     public ResponseEntity<List<UsuarioResponse>> buscarUsuariosPorNombre(@RequestParam String nombre) {
         List<UsuarioResponse> responses = usuarioService.buscarUsuariosPorNombre(nombre);
         return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}/donar")
+    public ResponseEntity<UsuarioResponse> incrementarDonacion(
+            @PathVariable Integer id,
+            @RequestParam java.math.BigDecimal cantidad) {
+        UsuarioResponse response = usuarioService.incrementarDonacion(id, cantidad);
+        return ResponseEntity.ok(response);
     }
 }

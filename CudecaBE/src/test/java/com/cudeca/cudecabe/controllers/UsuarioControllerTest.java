@@ -45,7 +45,6 @@ class UsuarioControllerTest {
         usuarioRequest = new UsuarioRequest();
         usuarioRequest.setNombre("Juan Pérez");
         usuarioRequest.setEmail("juan@example.com");
-        usuarioRequest.setUsername("juanperez");
         usuarioRequest.setTelefono("123456789");
         usuarioRequest.setPassword("password123");
         usuarioRequest.setRol("USER");
@@ -54,7 +53,6 @@ class UsuarioControllerTest {
         usuarioResponse.setId(1);
         usuarioResponse.setNombre("Juan Pérez");
         usuarioResponse.setEmail("juan@example.com");
-        usuarioResponse.setUsername("juanperez");
         usuarioResponse.setTelefono("123456789");
         usuarioResponse.setRol("USER");
     }
@@ -71,8 +69,7 @@ class UsuarioControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.nombre").value("Juan Pérez"))
-                .andExpect(jsonPath("$.email").value("juan@example.com"))
-                .andExpect(jsonPath("$.username").value("juanperez"));
+                .andExpect(jsonPath("$.email").value("juan@example.com"));
 
         verify(userService, times(1)).crearUsuario(any(UsuarioRequest.class));
     }
@@ -143,17 +140,6 @@ class UsuarioControllerTest {
         verify(userService, times(1)).obtenerUsuarioPorEmail("juan@example.com");
     }
 
-    @Test
-    @WithMockUser
-    void testObtenerUsuarioPorUsername_Success() throws Exception {
-        when(userService.obtenerUsuarioPorUsername("juanperez")).thenReturn(usuarioResponse);
-
-        mockMvc.perform(get("/api/usuarios/username/juanperez"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("juanperez"));
-
-        verify(userService, times(1)).obtenerUsuarioPorUsername("juanperez");
-    }
 
     @Test
     @WithMockUser
@@ -198,4 +184,3 @@ class UsuarioControllerTest {
         verify(userService, never()).crearUsuario(any(UsuarioRequest.class));
     }
 }
-

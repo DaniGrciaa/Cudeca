@@ -26,10 +26,13 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Token no recibido del servidor');
       }
 
-      // Guardar el token primero para que las siguientes peticiones lo usen
+      // Guardar el token y refresh token primero para que las siguientes peticiones lo usen
       localStorage.setItem('cudeca_token', response.token);
+      if (response.refreshToken) {
+        localStorage.setItem('cudeca_refresh_token', response.refreshToken);
+      }
       
-      console.log('Token guardado, obteniendo datos completos del usuario...');
+      console.log('Tokens guardados, obteniendo datos completos del usuario...');
       
       // Obtener todos los usuarios y buscar el actual por email para tener datos completos
       try {
@@ -40,13 +43,23 @@ export const AuthProvider = ({ children }) => {
         console.log('Usuario completo encontrado:', usuarioCompleto);
         
         if (usuarioCompleto) {
+          // Obtener la primera dirección si existe
+          const primeraDir = usuarioCompleto.direcciones && usuarioCompleto.direcciones.length > 0 
+            ? usuarioCompleto.direcciones[0] 
+            : null;
+          
           const userData = {
             id: usuarioCompleto.id,
             username: usuarioCompleto.username || response.username,
             email: usuarioCompleto.email,
             nombre: usuarioCompleto.nombre || response.username,
             telefono: usuarioCompleto.telefono,
-            direccion: usuarioCompleto.direccion,
+            direccion: primeraDir ? {
+              calle: primeraDir.calle,
+              ciudad: primeraDir.ciudad,
+              codigoPostal: primeraDir.codigoPostal,
+              pais: primeraDir.pais
+            } : null,
             rol: response.rol,
             esSocio: response.rol === 'SOCIO',
           };
@@ -85,28 +98,14 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       console.log('Registrando usuario con datos:', userData);
-      
-      // Generar username a partir del email
-      const username = userData.email.split('@')[0];
-      
-      const nuevoUsuario = {
-        nombre: userData.nombre + (userData.apellidos ? ' ' + userData.apellidos : ''),
-        email: userData.email,
-        telefono: userData.telefono || null,
-        direccion: userData.direccion || null,
-        username: username,
-        password: userData.password,
-        rol: 'SOCIO'
-      };
 
-      console.log('Enviando al backend:', nuevoUsuario);
-
-      const response = await fetch('http://localhost:8080/api/usuarios', {
+      // Usar el endpoint de registro que devuelve tokens
+      const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(nuevoUsuario),
+        body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
@@ -122,15 +121,24 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      const usuarioCreado = await response.json();
-      console.log('Usuario creado exitosamente:', usuarioCreado);
+      const responseData = await response.json();
+      console.log('Usuario registrado exitosamente:', responseData);
+      
+      // Guardar los tokens
+      if (responseData.token) {
+        localStorage.setItem('cudeca_token', responseData.token);
+      }
+      if (responseData.refreshToken) {
+        localStorage.setItem('cudeca_refresh_token', responseData.refreshToken);
+      }
 
+      // Crear sesión de usuario
       const userSession = {
-        id: usuarioCreado.id,
-        nombre: usuarioCreado.nombre,
-        apellidos: '',
-        email: usuarioCreado.email,
-        esSocio: true,
+        username: responseData.username,
+        email: responseData.email,
+        nombre: responseData.username || userData.nombre,
+        rol: responseData.rol,
+        esSocio: responseData.rol === 'SOCIO',
       };
 
       setUser(userSession);
@@ -147,6 +155,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('cudeca_user');
     localStorage.removeItem('cudeca_token');
+    localStorage.removeItem('cudeca_refresh_token');
   };
 
   const value = {

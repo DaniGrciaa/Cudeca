@@ -6,20 +6,139 @@ const getAuthToken = () => {
   return localStorage.getItem('cudeca_token');
 };
 
+// Obtener refresh token del localStorage
+const getRefreshToken = () => {
+  return localStorage.getItem('cudeca_refresh_token');
+};
+
+// Variable para evitar múltiples intentos de refresh simultáneos
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Función para refrescar el token
+const refreshAuthToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to refresh token');
+  }
+
+  const data = await response.json();
+  
+  // Guardar los nuevos tokens
+  localStorage.setItem('cudeca_token', data.token);
+  localStorage.setItem('cudeca_refresh_token', data.refreshToken);
+  
+  // Actualizar también los datos del usuario si vienen
+  if (data.username && data.email) {
+    const savedUser = localStorage.getItem('cudeca_user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      const updatedUser = {
+        ...user,
+        username: data.username,
+        email: data.email,
+        rol: data.rol,
+      };
+      localStorage.setItem('cudeca_user', JSON.stringify(updatedUser));
+    }
+  }
+  
+  return data.token;
+};
+
+// Función auxiliar para hacer peticiones con manejo de refresh token
+const fetchWithAuth = async (url, options) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  let response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  // Si recibimos 401, intentar refrescar el token
+  if (response.status === 401 && !options._retry) {
+    if (isRefreshing) {
+      // Si ya hay un refresh en proceso, esperar a que termine
+      try {
+        const token = await new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        });
+        headers['Authorization'] = `Bearer ${token}`;
+        return fetch(url, {
+          ...options,
+          headers,
+        });
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    isRefreshing = true;
+
+    try {
+      const newToken = await refreshAuthToken();
+      isRefreshing = false;
+      processQueue(null, newToken);
+
+      // Reintentar la petición original con el nuevo token
+      headers['Authorization'] = `Bearer ${newToken}`;
+      return fetch(url, {
+        ...options,
+        headers,
+        _retry: true,
+      });
+    } catch (error) {
+      isRefreshing = false;
+      processQueue(error, null);
+      
+      // Si falla el refresh, limpiar todo y redirigir al login
+      localStorage.removeItem('cudeca_token');
+      localStorage.removeItem('cudeca_refresh_token');
+      localStorage.removeItem('cudeca_user');
+      window.location.href = '/login';
+      
+      throw error;
+    }
+  }
+
+  return response;
+};
+
 // API Client con configuración básica
 const apiClient = {
   get: async (endpoint) => {
-    const token = getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
-      headers,
     });
     
     if (!response.ok) {
@@ -30,17 +149,8 @@ const apiClient = {
   },
 
   post: async (endpoint, data) => {
-    const token = getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers,
       body: JSON.stringify(data),
     });
     
@@ -52,17 +162,8 @@ const apiClient = {
   },
 
   put: async (endpoint, data) => {
-    const token = getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
-      headers,
       body: JSON.stringify(data),
     });
     
@@ -74,17 +175,8 @@ const apiClient = {
   },
 
   delete: async (endpoint) => {
-    const token = getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
-      headers,
     });
     
     if (!response.ok) {
@@ -131,6 +223,17 @@ export const usuariosAPI = {
   create: (data) => apiClient.post('/usuarios', data),
   update: (id, data) => apiClient.put(`/usuarios/${id}`, data),
   delete: (id) => apiClient.delete(`/usuarios/${id}`),
+  incrementarDonacion: async (id, cantidad) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/usuarios/${id}/donar?cantidad=${cantidad}`, {
+      method: 'PATCH',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
 };
 
 // Compras API

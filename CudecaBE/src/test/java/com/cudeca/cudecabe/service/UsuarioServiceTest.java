@@ -43,7 +43,6 @@ class UsuarioServiceTest {
         usuario.setId(1);
         usuario.setNombre("Juan Pérez");
         usuario.setEmail("juan@example.com");
-        usuario.setUsername("juanperez");
         usuario.setTelefono("123456789");
         usuario.setPassword("password123");
         usuario.setRol("USER");
@@ -51,7 +50,6 @@ class UsuarioServiceTest {
         usuarioRequest = new UsuarioRequest();
         usuarioRequest.setNombre("Juan Pérez");
         usuarioRequest.setEmail("juan@example.com");
-        usuarioRequest.setUsername("juanperez");
         usuarioRequest.setTelefono("123456789");
         usuarioRequest.setPassword("password123");
         usuarioRequest.setRol("USER");
@@ -60,7 +58,6 @@ class UsuarioServiceTest {
         usuarioResponse.setId(1);
         usuarioResponse.setNombre("Juan Pérez");
         usuarioResponse.setEmail("juan@example.com");
-        usuarioResponse.setUsername("juanperez");
         usuarioResponse.setTelefono("123456789");
         usuarioResponse.setRol("USER");
     }
@@ -68,7 +65,6 @@ class UsuarioServiceTest {
     @Test
     void testCrearUsuario_Success() {
         when(userRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(false);
-        when(userRepository.existsByUsername(usuarioRequest.getUsername())).thenReturn(false);
         when(usuarioMapper.toEntity(usuarioRequest)).thenReturn(usuario);
         when(userRepository.save(usuario)).thenReturn(usuario);
         when(usuarioMapper.toResponse(usuario)).thenReturn(usuarioResponse);
@@ -89,18 +85,6 @@ class UsuarioServiceTest {
             () -> usuarioService.crearUsuario(usuarioRequest));
 
         assertEquals("El email ya está registrado", exception.getMessage());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testCrearUsuario_UsernameYaExiste() {
-        when(userRepository.existsByEmail(usuarioRequest.getEmail())).thenReturn(false);
-        when(userRepository.existsByUsername(usuarioRequest.getUsername())).thenReturn(true);
-
-        RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> usuarioService.crearUsuario(usuarioRequest));
-
-        assertEquals("El username ya está registrado", exception.getMessage());
         verify(userRepository, never()).save(any());
     }
 
@@ -185,17 +169,6 @@ class UsuarioServiceTest {
         verify(userRepository, times(1)).findByEmail("juan@example.com");
     }
 
-    @Test
-    void testObtenerUsuarioPorUsername_Success() {
-        when(userRepository.findByUsername("juanperez")).thenReturn(Optional.of(usuario));
-        when(usuarioMapper.toResponse(usuario)).thenReturn(usuarioResponse);
-
-        UsuarioResponse result = usuarioService.obtenerUsuarioPorUsername("juanperez");
-
-        assertNotNull(result);
-        assertEquals("juanperez", result.getUsername());
-        verify(userRepository, times(1)).findByUsername("juanperez");
-    }
 
     @Test
     void testObtenerUsuariosPorRol_Success() {
@@ -223,4 +196,3 @@ class UsuarioServiceTest {
         verify(userRepository, times(1)).findByNombreContainingIgnoreCase("Juan");
     }
 }
-

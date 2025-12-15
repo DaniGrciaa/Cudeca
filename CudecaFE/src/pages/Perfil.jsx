@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, MapPin, Heart, Phone, Edit2, Save, X, Calendar, CheckCircle, LogIn, UserPlus } from 'lucide-react';
+import { User, Mail, MapPin, Heart, Phone, Edit2, Save, X, CheckCircle, LogIn, UserPlus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { usuariosAPI, comprasAPI } from '../services/api';
+import { usuariosAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Perfil = () => {
@@ -21,9 +21,85 @@ const Perfil = () => {
   });
 
   const [editData, setEditData] = useState({ ...profileData });
-  const [donaciones, setDonaciones] = useState([]);
+  const [totalDonado, setTotalDonado] = useState(0);
 
-  // Si no está autenticado, mostrar mensaje de login
+  // useEffect debe ejecutarse siempre antes de cualquier return condicional
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        
+        // Obtener datos completos del usuario desde el backend para tener cantidadDonada actualizada
+        const usuarioCompleto = await usuariosAPI.getById(user.id);
+        
+        // Usar datos del usuario del backend
+        const transformedProfile = {
+          nombre: usuarioCompleto.nombre || user.username || 'Sin nombre',
+          email: usuarioCompleto.email,
+          ciudad: usuarioCompleto.direcciones?.[0]?.ciudad || user.direccion?.ciudad || 'No especificada',
+          socio: usuarioCompleto.rol === 'SOCIO' ? 'Sí - Socio de Cudeca' : 'Usuario registrado',
+          telefono: usuarioCompleto.telefono || 'No especificado',
+          direccion: usuarioCompleto.direcciones?.[0]?.calle || user.direccion?.calle || 'No especificada',
+          codigoPostal: usuarioCompleto.direcciones?.[0]?.codigoPostal || user.direccion?.codigoPostal || ''
+        };
+        
+        setProfileData(transformedProfile);
+        setEditData(transformedProfile);
+        
+        // Establecer el total donado desde el backend
+        setTotalDonado(usuarioCompleto.cantidadDonada || 0);
+      } catch (err) {
+        console.error('Error al cargar datos del usuario:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditData({ ...profileData });
+  };
+
+  const handleSave = async () => {
+    try {
+      const updatedUser = {
+        nombre: editData.nombre,
+        email: editData.email,
+        telefono: editData.telefono !== 'No especificado' ? editData.telefono : null,
+        username: user.email.split('@')[0],
+        password: 'temporal123', // Mantener la contraseña existente
+        rol: 'SOCIO'
+      };
+      
+      await usuariosAPI.update(user.id, updatedUser);
+      setProfileData({ ...editData });
+      setIsEditing(false);
+      alert('Perfil actualizado correctamente');
+    } catch (err) {
+      console.error('Error al actualizar perfil:', err);
+      alert('Error al actualizar el perfil. Por favor, inténtalo de nuevo.');
+    }
+  };
+
+  const handleCancel = () => {
+    setEditData({ ...profileData });
+    setIsEditing(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Todos los returns condicionales van DESPUÉS de los hooks
   if (!authLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -69,96 +145,6 @@ const Perfil = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        
-        // Usar datos del usuario del contexto
-        const transformedProfile = {
-          nombre: user.nombre || user.username || 'Sin nombre',
-          email: user.email,
-          ciudad: '',
-          socio: user.rol === 'SOCIO' ? 'Sí - Socio de Cudeca' : 'Usuario registrado',
-          telefono: user.telefono || 'No especificado',
-          direccion: user.direccion || 'No especificada',
-          codigoPostal: ''
-        };
-        
-        setProfileData(transformedProfile);
-        setEditData(transformedProfile);
-        
-        // Por ahora, usar compras mock ya que no tenemos el userId en el backend
-        // TODO: Cuando el backend devuelva el userId en el login, descomentar esto:
-        // const compras = await comprasAPI.getByUsuarioId(user.id);
-        const compras = [];
-        
-        const transformedDonaciones = compras.map(compra => ({
-          id: compra.id,
-          evento: compra.evento?.nombre || 'Evento no especificado',
-          fecha: new Date(compra.fechaCompra).toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          }),
-          cantidad: compra.precioTotal || 0,
-          status: compra.estadoPago || 'Completado'
-        }));
-        
-        setDonaciones(transformedDonaciones);
-      } catch (err) {
-        console.error('Error al cargar datos del usuario:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [user]);
-
-  const totalDonado = donaciones.reduce((sum, d) => sum + d.cantidad, 0);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditData({ ...profileData });
-  };
-
-  const handleSave = async () => {
-    try {
-      const updatedUser = {
-        nombre: editData.nombre,
-        email: editData.email,
-        telefono: editData.telefono !== 'No especificado' ? editData.telefono : null,
-        username: user.email.split('@')[0],
-        password: 'temporal123', // Mantener la contraseña existente
-        rol: 'SOCIO'
-      };
-      
-      await usuariosAPI.update(userId, updatedUser);
-      setProfileData({ ...editData });
-      setIsEditing(false);
-      alert('Perfil actualizado correctamente');
-    } catch (err) {
-      console.error('Error al actualizar perfil:', err);
-      alert('Error al actualizar el perfil. Por favor, inténtalo de nuevo.');
-    }
-  };
-
-  const handleCancel = () => {
-    setEditData({ ...profileData });
-    setIsEditing(false);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   if (loading) {
     return (
@@ -369,23 +355,18 @@ const Perfil = () => {
                 )}
               </div>
 
-              {/* Estadísticas rápidas */}
+              {/* Total Donado */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-cudeca-lightGreen rounded-lg">
-                    <p className="text-3xl font-bold text-cudeca-darkGreen">{donaciones.length}</p>
-                    <p className="text-sm text-gray-700">Donaciones</p>
-                  </div>
-                  <div className="text-center p-4 bg-cudeca-mediumGreen rounded-lg">
-                    <p className="text-3xl font-bold text-white">{totalDonado.toFixed(0)} €</p>
-                    <p className="text-sm text-white">Total Donado</p>
-                  </div>
+                <div className="text-center p-6 bg-gradient-to-br from-cudeca-mediumGreen to-cudeca-darkGreen rounded-lg shadow-lg">
+                  <p className="text-sm text-white mb-2 font-semibold">Total Donado</p>
+                  <p className="text-5xl font-bold text-cudeca-yellow">{totalDonado.toFixed(2)} €</p>
+                  <p className="text-sm text-white mt-3 opacity-90">Gracias por tu generosidad</p>
                 </div>
               </div>
             </motion.div>
           </div>
 
-          {/* Panel Derecho - Historial de Donaciones */}
+          {/* Panel Derecho - Impacto de las Donaciones */}
           <div className="lg:col-span-3">
             <motion.div
               className="bg-white rounded-lg shadow-xl p-8"
@@ -395,81 +376,67 @@ const Perfil = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                  <Calendar className="w-8 h-8 text-cudeca-darkGreen" aria-hidden="true" />
-                  Mis Donaciones
+                  <Heart className="w-8 h-8 text-cudeca-darkGreen fill-cudeca-darkGreen" aria-hidden="true" />
+                  Tu Contribución
                 </h2>
               </div>
 
-              {/* Tabla de donaciones */}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-4 px-4 font-bold text-gray-700">Evento</th>
-                      <th className="text-left py-4 px-4 font-bold text-gray-700">Fecha</th>
-                      <th className="text-right py-4 px-4 font-bold text-gray-700">Cantidad</th>
-                      <th className="text-center py-4 px-4 font-bold text-gray-700">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {donaciones.map((donacion, index) => (
-                      <motion.tr
-                        key={donacion.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.05 }}
-                      >
-                        <td className="py-4 px-4">
-                          <p className="font-semibold text-gray-900">{donacion.evento}</p>
-                        </td>
-                        <td className="py-4 px-4 text-gray-600">
-                          {donacion.fecha}
-                        </td>
-                        <td className="py-4 px-4 text-right">
-                          <span className="font-bold text-cudeca-darkGreen text-lg">
-                            {donacion.cantidad.toFixed(2)} €
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-center">
-                          <span className="inline-flex items-center gap-2 bg-green-100 text-green-800 font-semibold px-3 py-1 rounded-full text-sm">
-                            <CheckCircle className="w-4 h-4" aria-hidden="true" />
-                            {donacion.status}
-                          </span>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-gray-200 bg-cudeca-lightGreen">
-                      <td colSpan="2" className="py-4 px-4 font-bold text-gray-900 text-lg">
-                        Total Donado
-                      </td>
-                      <td className="py-4 px-4 text-right font-bold text-cudeca-darkGreen text-2xl">
-                        {totalDonado.toFixed(2)} €
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
+              {/* Total Donado Destacado */}
+              <div className="bg-gradient-to-br from-cudeca-darkGreen to-green-700 rounded-2xl p-12 text-center mb-8 shadow-2xl">
+                <p className="text-2xl text-white mb-4 font-semibold">Has donado un total de</p>
+                <p className="text-7xl font-bold text-cudeca-yellow mb-4">{totalDonado.toFixed(2)} €</p>
+                <div className="h-1 w-32 bg-cudeca-yellow mx-auto rounded-full"></div>
               </div>
 
               {/* Mensaje de agradecimiento */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-cudeca-green to-cudeca-mediumGreen rounded-lg">
-                <h3 className="text-2xl font-bold text-white mb-3">
-                  ¡Gracias por tu apoyo! 🎉
+              <div className="mb-8 p-8 bg-gradient-to-r from-cudeca-green to-cudeca-mediumGreen rounded-xl shadow-lg">
+                <h3 className="text-3xl font-bold text-white mb-4 flex items-center gap-3">
+                  <span>🎉</span> ¡Gracias por tu apoyo!
                 </h3>
-                <p className="text-lg text-white">
+                <p className="text-xl text-white leading-relaxed">
                   Tu generosidad ha ayudado a proporcionar cuidados paliativos gratuitos a familias que lo necesitan. 
                   Cada donación cuenta y hace una diferencia real en la vida de las personas.
                 </p>
               </div>
 
-              {/* CTA para más eventos */}
-              <div className="mt-6 text-center">
+              {/* Impacto de la donación */}
+              <div className="bg-green-50 rounded-xl p-8 border-2 border-green-200 mb-8">
+                <h3 className="text-2xl font-bold text-cudeca-darkGreen mb-6 flex items-center gap-2">
+                  <CheckCircle className="w-7 h-7" />
+                  Tu impacto en Cudeca
+                </h3>
+                <div className="space-y-4 text-lg text-gray-700">
+                  <p className="flex items-start gap-3">
+                    <span className="text-cudeca-darkGreen text-2xl">✓</span>
+                    <span>Ayudas a mantener nuestros servicios totalmente gratuitos</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <span className="text-cudeca-darkGreen text-2xl">✓</span>
+                    <span>Contribuyes al cuidado integral de pacientes y sus familias</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <span className="text-cudeca-darkGreen text-2xl">✓</span>
+                    <span>Apoyas la formación continua de profesionales sanitarios</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <span className="text-cudeca-darkGreen text-2xl">✓</span>
+                    <span>Haces posible la investigación en cuidados paliativos</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA para donar más */}
+              <div className="text-center space-y-4">
+                <a
+                  href="/donar"
+                  className="inline-block bg-cudeca-yellow text-gray-900 font-bold py-4 px-10 rounded-xl hover:bg-yellow-500 transition-all duration-200 shadow-lg hover:shadow-xl text-xl transform hover:scale-105"
+                >
+                  Hacer otra donación
+                </a>
+                <p className="text-gray-600">o</p>
                 <a
                   href="/eventos"
-                  className="inline-block bg-cudeca-darkGreen text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg focus:outline-none focus:ring-4 focus:ring-cudeca-darkGreen focus:ring-offset-2"
+                  className="inline-block bg-cudeca-darkGreen text-white font-bold py-4 px-10 rounded-xl hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl text-xl"
                 >
                   Ver Próximos Eventos
                 </a>
