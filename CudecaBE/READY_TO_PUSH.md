@@ -1,8 +1,23 @@
-# ✅ ¡TODO LISTO! - JAVA 17 CONFIGURADO
+# ✅ ¡TODO LISTO! - SPRING BOOT 3.2.5 (ESTABLE) + JAVA 17
 
 ## 🎯 DECISIÓN FINAL
 
-**Usando Java 17 LTS** para máxima compatibilidad con Railway/Nixpacks.
+**Usando Spring Boot 3.2.5 LTS** (versión estable y probada) + **Java 17** para máxima compatibilidad con Railway/Nixpacks.
+
+### ⚠️ Por qué NO Spring Boot 3.5.7:
+
+- ❌ **Demasiado nueva** (lanzada hace solo semanas)
+- ❌ **Incompatibilidades** con librerías de terceros
+- ❌ **Bugs sin resolver**
+- ❌ **Falta de soporte** en Nixpacks/Railway
+
+### ✅ Por qué SÍ Spring Boot 3.2.5:
+
+- ✅ **LTS** (Long Term Support)
+- ✅ **Probada** en millones de aplicaciones
+- ✅ **100% compatible** con Java 17
+- ✅ **Soporte estable** en Railway/Nixpacks
+- ✅ **Compatible** con JWT, OAuth2, Flyway, etc.
 
 ---
 
@@ -11,16 +26,14 @@
 ### Archivos modificados:
 
 1. ✅ **`pom.xml`**
-   - `<java.version>17</java.version>`
+   - `<version>3.2.5</version>` (era 3.5.7)
+   - `<java.version>17</java.version>` (estable)
 
 2. ✅ **`nixpacks.json`**
    - `"nixPkgs": ["jdk17", "maven"]`
 
-3. ✅ **`PUSH_READY.md`**
-   - Documentación actualizada
-
-4. ✅ **`FIX_RAILWAY_MVN_ERROR.md`**
-   - Guía completa actualizada
+3. ✅ **Documentación actualizada**
+   - Guías actualizadas con versiones correctas
 
 ---
 
