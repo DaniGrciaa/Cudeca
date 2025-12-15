@@ -26,20 +26,20 @@ at /app/.nixpacks/nixpkgs-5148520bfab61f99fd25fb9ff7bfbb50dad3c9db.nix:19:9
 ```
 
 **Problema:** 
-- Railway estaba usando JDK 17 pero el proyecto fue compilado con Java 21 localmente
-- El paquete `jdk21` no existe en Nixpacks, el correcto es `jdk` (que ya apunta a Java 21)
+- El proyecto necesitaba una versión de Java estable
+- Los paquetes `jdk21` y `jdk` causaban problemas en Nixpacks
+- **Solución final:** Usar Java 17 LTS que tiene soporte estable en Railway
 
 ## ✅ SOLUCIÓN APLICADA
 
-He actualizado 3 archivos para sincronizar Java 21 en Railway:
+He configurado el proyecto para usar **Java 17 LTS** para mejor compatibilidad:
 
 ### 1. `pom.xml` (actualizado)
-- Cambiado `<java.version>` de 17 a **21**
-- Sincronizado con la versión de IntelliJ
+- Configurado `<java.version>17</java.version>`
+- Java 17 es LTS y totalmente compatible con Spring Boot 3.x
 
 ### 2. `nixpacks.json` (actualizado)
-- Cambiado `jdk21` a **`jdk`** (nombre correcto del paquete en Nix)
-- El paquete `jdk` en Nixpacks apunta automáticamente a la última versión LTS (Java 21)
+- Configurado `"jdk17"` (paquete estable y confirmado en Nixpacks)
 - Maven configurado correctamente
 
 ### 3. `railway.toml` (sin cambios)
@@ -74,7 +74,7 @@ git push
 
 Railway redesplegará automáticamente y:
 
-1. ✅ Instalará **JDK** (versión 21 LTS por defecto en Nixpacks)
+1. ✅ Instalará **JDK 17** (versión LTS estable)
 2. ✅ Instalará Maven
 3. ✅ Ejecutará `mvn clean package -DskipTests` correctamente
 4. ✅ Generará el JAR en `target/CudecaBE-0.0.1-SNAPSHOT.jar`
@@ -95,7 +95,7 @@ Railway redesplegará automáticamente y:
 ### Busca en los logs:
 
 ```
-✅ [nixpacks] Installing nixPkgs: jdk, maven
+✅ [nixpacks] Installing nixPkgs: jdk17, maven
 ✅ [maven] Running 'mvn clean package -DskipTests'
 ✅ [maven] BUILD SUCCESS
 ✅ [maven] Total time: X min
@@ -160,7 +160,7 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
   "providers": [],
   "phases": {
     "setup": {
-      "nixPkgs": ["jdk", "maven"]
+      "nixPkgs": ["jdk17", "maven"]
     },
     "build": {
       "cmds": [
@@ -174,7 +174,7 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
 }
 ```
 
-**Nota:** El paquete `jdk` en Nixpacks apunta automáticamente a Java 21 LTS.
+**Nota:** `jdk17` es la versión LTS estable y confirmada en Nixpacks.
 
 ### `railway.toml`
 ```toml
@@ -194,7 +194,7 @@ timeout = 100
 ### `pom.xml` (sección properties)
 ```xml
 <properties>
-    <java.version>21</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 </properties>
@@ -205,8 +205,8 @@ timeout = 100
 ## ✅ RESUMEN
 
 **Cambios aplicados:**
-- ✅ Java actualizado de 17 a **21** (sincronizado con IntelliJ)
-- ✅ Configuración correcta de JDK y Maven en nixpacks (`jdk` en lugar de `jdk21`)
+- ✅ Java configurado a **17 LTS** (versión estable)
+- ✅ Configuración correcta de JDK 17 y Maven en nixpacks
 - ✅ Comando de build correcto
 - ✅ Start command optimizado
 - ✅ Healthcheck configurado
