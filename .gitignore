@@ -1,0 +1,26 @@
+﻿# Backend (Maven/Spring Boot)
+CudecaBE/target/
+CudecaBE/.mvn/
+CudecaBE/*.jar
+CudecaBE/*.log
+
+# Frontend (Node/React)
+CudecaFE/node_modules/
+CudecaFE/dist/
+CudecaFE/build/
+CudecaFE/.env
+CudecaFE/.env.local
+CudecaFE/.env.production
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Railway
+.railway/
