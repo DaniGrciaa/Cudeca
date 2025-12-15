@@ -35,6 +35,12 @@ Para el desarrollo de este proyecto, el equipo ha seguido estrictamente el marco
 * **Framework/Librería:** [React / Angular / Vue / HTML5 & CSS3 nativo]
 * **Estilos:** [CSS / Bootstrap / Tailwind]
 
+## 📚 Documentación Detallada
+
+Para profundizar en los detalles técnicos de cada parte del sistema, consulta el siguiente documento:
+
+* ⚙️ **[Detalles del Proyecto (Diseño, componentes, instalación...)](./CudecaFE/README.md)**
+
 ## 📂 Estructura del Proyecto
 
 El repositorio está organizado en dos directorios principales:
