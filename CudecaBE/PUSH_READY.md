@@ -59,7 +59,7 @@ git push
 Railway redesplegará automáticamente (3-5 minutos):
 
 1. ✅ Detecta push en GitHub
-2. ✅ Instala JDK (versión 21)
+2. ✅ Instala **JDK 17** (versión LTS estable)
 3. ✅ Instala Maven
 4. ✅ Ejecuta `mvn clean package -DskipTests`
 5. ✅ **BUILD SUCCESS**
@@ -71,9 +71,9 @@ Railway redesplegará automáticamente (3-5 minutos):
 ## 👀 LOGS ESPERADOS
 
 ```
-✅ [nixpacks] Installing nixPkgs: jdk, maven
+✅ [nixpacks] Installing nixPkgs: jdk17, maven
 ✅ [maven] Downloading dependencies...
-✅ [maven] Compiling 120 source files to /app/target/classes
+✅ [maven] Compiling source files to /app/target/classes
 ✅ [maven] BUILD SUCCESS
 ✅ [maven] Total time: 2.5 min
 ✅ [spring-boot] Started CudecaBeApplication in 8.234 seconds
@@ -97,9 +97,11 @@ https://tu-backend-url.up.railway.app/api/eventos
 
 | Componente | Valor Anterior | Valor Actual |
 |------------|----------------|--------------|
-| Java (pom.xml) | 17 | **21** ✅ |
-| JDK (nixpacks) | jdk21 ❌ | **jdk** ✅ |
+| Java (pom.xml) | 21 ❌ | **17** ✅ |
+| JDK (nixpacks) | jdk/jdk21 ❌ | **jdk17** ✅ |
 | Maven | maven ✅ | maven ✅ |
+
+**Razón del cambio:** Java 17 es LTS y tiene mejor soporte en Railway/Nixpacks.
 
 ---
 
