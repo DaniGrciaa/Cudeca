@@ -19,7 +19,15 @@ RUN mvn clean package -DskipTests
 ERROR: exit code: 1
 ```
 
-**Problema:** Railway estaba usando JDK 17 pero el proyecto fue compilado con Java 21 localmente.
+### Error 4: "undefined variable 'jdk21'"
+```
+error: undefined variable 'jdk21'
+at /app/.nixpacks/nixpkgs-5148520bfab61f99fd25fb9ff7bfbb50dad3c9db.nix:19:9
+```
+
+**Problema:** 
+- Railway estaba usando JDK 17 pero el proyecto fue compilado con Java 21 localmente
+- El paquete `jdk21` no existe en Nixpacks, el correcto es `jdk` (que ya apunta a Java 21)
 
 ## ✅ SOLUCIÓN APLICADA
 
@@ -30,7 +38,8 @@ He actualizado 3 archivos para sincronizar Java 21 en Railway:
 - Sincronizado con la versión de IntelliJ
 
 ### 2. `nixpacks.json` (actualizado)
-- Cambiado `jdk17` a **`jdk21`**
+- Cambiado `jdk21` a **`jdk`** (nombre correcto del paquete en Nix)
+- El paquete `jdk` en Nixpacks apunta automáticamente a la última versión LTS (Java 21)
 - Maven configurado correctamente
 
 ### 3. `railway.toml` (sin cambios)
@@ -65,7 +74,7 @@ git push
 
 Railway redesplegará automáticamente y:
 
-1. ✅ Instalará **JDK 21** (sincronizado con tu IntelliJ)
+1. ✅ Instalará **JDK** (versión 21 LTS por defecto en Nixpacks)
 2. ✅ Instalará Maven
 3. ✅ Ejecutará `mvn clean package -DskipTests` correctamente
 4. ✅ Generará el JAR en `target/CudecaBE-0.0.1-SNAPSHOT.jar`
@@ -86,7 +95,7 @@ Railway redesplegará automáticamente y:
 ### Busca en los logs:
 
 ```
-✅ [nixpacks] Installing nixPkgs: jdk21, maven
+✅ [nixpacks] Installing nixPkgs: jdk, maven
 ✅ [maven] Running 'mvn clean package -DskipTests'
 ✅ [maven] BUILD SUCCESS
 ✅ [maven] Total time: X min
@@ -151,7 +160,7 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
   "providers": [],
   "phases": {
     "setup": {
-      "nixPkgs": ["jdk21", "maven"]
+      "nixPkgs": ["jdk", "maven"]
     },
     "build": {
       "cmds": [
@@ -164,6 +173,8 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
   }
 }
 ```
+
+**Nota:** El paquete `jdk` en Nixpacks apunta automáticamente a Java 21 LTS.
 
 ### `railway.toml`
 ```toml
@@ -195,7 +206,7 @@ timeout = 100
 
 **Cambios aplicados:**
 - ✅ Java actualizado de 17 a **21** (sincronizado con IntelliJ)
-- ✅ Configuración explícita de JDK 21 y Maven en nixpacks
+- ✅ Configuración correcta de JDK y Maven en nixpacks (`jdk` en lugar de `jdk21`)
 - ✅ Comando de build correcto
 - ✅ Start command optimizado
 - ✅ Healthcheck configurado
