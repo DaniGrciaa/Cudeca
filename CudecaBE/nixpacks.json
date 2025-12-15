@@ -2,7 +2,7 @@
   "providers": [],
   "phases": {
     "setup": {
-      "nixPkgs": ["jdk17", "maven"]
+      "nixPkgs": ["jdk21", "maven"]
     },
     "build": {
       "cmds": [

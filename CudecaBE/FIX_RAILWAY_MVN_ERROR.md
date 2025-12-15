@@ -13,37 +13,47 @@ RUN vn clean package -DskipTests
 Error: Provider maven not found
 ```
 
-**Problema:** Railway/Nixpacks tenía problemas detectando y ejecutando Maven correctamente.
+### Error 3: "Maven build failed - exit code: 1"
+```
+RUN mvn clean package -DskipTests
+ERROR: exit code: 1
+```
+
+**Problema:** Railway estaba usando JDK 17 pero el proyecto fue compilado con Java 21 localmente.
 
 ## ✅ SOLUCIÓN APLICADA
 
-He actualizado 2 archivos para configurar Railway correctamente:
+He actualizado 3 archivos para sincronizar Java 21 en Railway:
 
-### 1. `nixpacks.json` (corregido)
-- Especifica JDK 17 y Maven como dependencias explícitas
-- Define el comando de build correcto
-- Configura el comando de inicio
+### 1. `pom.xml` (actualizado)
+- Cambiado `<java.version>` de 17 a **21**
+- Sincronizado con la versión de IntelliJ
 
-### 2. `railway.toml` (corregido)
-- Configuración limpia para Railway
-- Healthcheck configurado
-- Start command correcto
+### 2. `nixpacks.json` (actualizado)
+- Cambiado `jdk17` a **`jdk21`**
+- Maven configurado correctamente
+
+### 3. `railway.toml` (sin cambios)
+- Configuración de deploy correcta
 
 ## 🚀 PASOS PARA APLICAR LA SOLUCIÓN
 
-### Ejecuta estos comandos en PowerShell:
+### Los cambios ya están aplicados. Solo haz commit y push:
 
 ```powershell
 # Ir a la carpeta raíz del proyecto
 cd C:\Users\Dani\Documents\Cudeca
 
-# Añadir los archivos corregidos
-git add CudecaBE/railway.toml
+# Ver los cambios realizados
+git status
+
+# Añadir los archivos modificados
+git add CudecaBE/pom.xml
 git add CudecaBE/nixpacks.json
 git add CudecaBE/FIX_RAILWAY_MVN_ERROR.md
 
 # Commit
-git commit -m "Fix: Configurar Railway con JDK17 y Maven explícitamente"
+git commit -m "Fix: Actualizar a Java 21 para Railway compatibility"
 
 # Push (dispara redespliegue automático)
 git push
@@ -55,7 +65,7 @@ git push
 
 Railway redesplegará automáticamente y:
 
-1. ✅ Instalará JDK 17
+1. ✅ Instalará **JDK 21** (sincronizado con tu IntelliJ)
 2. ✅ Instalará Maven
 3. ✅ Ejecutará `mvn clean package -DskipTests` correctamente
 4. ✅ Generará el JAR en `target/CudecaBE-0.0.1-SNAPSHOT.jar`
@@ -76,12 +86,11 @@ Railway redesplegará automáticamente y:
 ### Busca en los logs:
 
 ```
-✅ Installing JDK 17
-✅ Installing Maven
+✅ [nixpacks] Installing nixPkgs: jdk21, maven
 ✅ [maven] Running 'mvn clean package -DskipTests'
-✅ BUILD SUCCESS
-✅ Total time: X min
-✅ Started CudecaBeApplication in X seconds
+✅ [maven] BUILD SUCCESS
+✅ [maven] Total time: X min
+✅ Started CudecaBeApplication in X seconds (JVM running for X)
 ```
 
 ---
@@ -101,9 +110,17 @@ https://tu-backend-url.up.railway.app/api/eventos
 ## 🆘 SI AÚN HAY ERRORES
 
 ### Error: "Could not find Java"
-**Solución:** Railway debería instalar JDK automáticamente. Si falla:
+**Solución:** Railway debería instalar JDK 21 automáticamente. Si falla:
 1. Settings → Environment
-2. Añade variable: `NIXPACKS_JDK_VERSION=17`
+2. Añade variable: `NIXPACKS_JDK_VERSION=21`
+
+### Error: "Source option X is no longer supported"
+**Solución:** Verifica que `pom.xml` tenga:
+```xml
+<properties>
+    <java.version>21</java.version>
+</properties>
+```
 
 ### Error: "pom.xml not found"
 **Solución:** Verifica Root Directory:
@@ -120,7 +137,7 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
 
 ### Build muy lento (más de 10 minutos)
 **Solución:** Es normal la primera vez. Railway descarga:
-- JDK 17 (~100MB)
+- JDK 21 (~120MB)
 - Dependencias Maven (~200MB)
 - Espera hasta 15 minutos la primera vez
 
@@ -134,7 +151,7 @@ DB_PASSWORD=${{Postgres.PGPASSWORD}}
   "providers": [],
   "phases": {
     "setup": {
-      "nixPkgs": ["jdk17", "maven"]
+      "nixPkgs": ["jdk21", "maven"]
     },
     "build": {
       "cmds": [
@@ -163,12 +180,22 @@ path = "/api/eventos"
 timeout = 100
 ```
 
+### `pom.xml` (sección properties)
+```xml
+<properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+</properties>
+```
+
 ---
 
 ## ✅ RESUMEN
 
 **Cambios aplicados:**
-- ✅ Configuración explícita de JDK 17 y Maven
+- ✅ Java actualizado de 17 a **21** (sincronizado con IntelliJ)
+- ✅ Configuración explícita de JDK 21 y Maven en nixpacks
 - ✅ Comando de build correcto
 - ✅ Start command optimizado
 - ✅ Healthcheck configurado
