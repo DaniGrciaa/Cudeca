@@ -1,6 +1,9 @@
 {
-  "providers": ["maven"],
+  "providers": [],
   "phases": {
+    "setup": {
+      "nixPkgs": ["jdk17", "maven"]
+    },
     "build": {
       "cmds": [
         "mvn clean package -DskipTests"

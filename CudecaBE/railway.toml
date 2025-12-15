@@ -4,11 +4,12 @@
 [build]
 builder = "NIXPACKS"
 
-[build.nixpacksPlan.phases.build]
-cmds = ["mvn clean package -DskipTests"]
-
 [deploy]
 startCommand = "java -Dserver.port=$PORT -jar target/CudecaBE-0.0.1-SNAPSHOT.jar"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[deploy.healthcheck]
+path = "/api/eventos"
+timeout = 100
 

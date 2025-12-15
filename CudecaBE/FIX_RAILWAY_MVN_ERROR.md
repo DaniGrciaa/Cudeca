@@ -1,109 +1,185 @@
-# 🔧 SOLUCIÓN AL ERROR: "vn: command not found"
+# 🔧 SOLUCIÓN AL ERROR: Railway Build Failed
 
-## ❌ ERROR DETECTADO
+## ❌ ERRORES DETECTADOS
 
+### Error 1: "vn: command not found"
 ```
 RUN vn clean package -DskipTests
 /bin/bash: line 1: vn: command not found
 ```
 
-**Problema:** Railway estaba generando un Dockerfile con `vn` en lugar de `mvn`.
+### Error 2: "Provider maven not found"
+```
+Error: Provider maven not found
+```
+
+**Problema:** Railway/Nixpacks tenía problemas detectando y ejecutando Maven correctamente.
 
 ## ✅ SOLUCIÓN APLICADA
 
-He creado/actualizado 2 archivos para forzar a Railway a usar el comando correcto:
+He actualizado 2 archivos para configurar Railway correctamente:
 
-### 1. `railway.toml` (actualizado)
-- Especifica explícitamente el comando de build: `mvn clean package -DskipTests`
+### 1. `nixpacks.json` (corregido)
+- Especifica JDK 17 y Maven como dependencias explícitas
+- Define el comando de build correcto
+- Configura el comando de inicio
 
-### 2. `nixpacks.json` (nuevo)
-- Configuración adicional para asegurar que Maven se ejecuta correctamente
+### 2. `railway.toml` (corregido)
+- Configuración limpia para Railway
+- Healthcheck configurado
+- Start command correcto
 
 ## 🚀 PASOS PARA APLICAR LA SOLUCIÓN
 
-### 1. Hacer commit y push de los cambios
-
-Abre PowerShell en la carpeta raíz de tu proyecto:
+### Ejecuta estos comandos en PowerShell:
 
 ```powershell
+# Ir a la carpeta raíz del proyecto
 cd C:\Users\Dani\Documents\Cudeca
-```
 
-Añadir los archivos actualizados:
-
-```powershell
+# Añadir los archivos corregidos
 git add CudecaBE/railway.toml
 git add CudecaBE/nixpacks.json
-git commit -m "Fix: Corregir comando Maven en Railway (vn -> mvn)"
+git add CudecaBE/FIX_RAILWAY_MVN_ERROR.md
+
+# Commit
+git commit -m "Fix: Configurar Railway con JDK17 y Maven explícitamente"
+
+# Push (dispara redespliegue automático)
 git push
 ```
 
-### 2. Railway redesplegará automáticamente
+---
 
-Una vez hagas push, Railway detectará los cambios y:
-- ✅ Usará la nueva configuración de `railway.toml`
-- ✅ Ejecutará `mvn clean package -DskipTests` correctamente
-- ✅ Compilará tu proyecto sin errores
+## ⏱️ QUÉ ESPERAR DESPUÉS DEL PUSH
 
-### 3. Verificar el despliegue
+Railway redesplegará automáticamente y:
+
+1. ✅ Instalará JDK 17
+2. ✅ Instalará Maven
+3. ✅ Ejecutará `mvn clean package -DskipTests` correctamente
+4. ✅ Generará el JAR en `target/CudecaBE-0.0.1-SNAPSHOT.jar`
+5. ✅ Iniciará la aplicación con `java -jar`
+
+**Tiempo estimado:** 3-5 minutos
+
+---
+
+## 👀 MONITOREAR EL DESPLIEGUE
 
 1. Ve a Railway Dashboard
-2. Click en tu servicio `cudeca-backend`
-3. Ve a "Deployments"
-4. Click en el nuevo deployment
-5. Ver logs
+2. Click en servicio `cudeca-backend`
+3. Tab **"Deployments"**
+4. Click en el deployment activo
+5. **"View Logs"**
 
-**Deberías ver:**
+### Busca en los logs:
+
 ```
-✅ mvn clean package -DskipTests
+✅ Installing JDK 17
+✅ Installing Maven
+✅ [maven] Running 'mvn clean package -DskipTests'
 ✅ BUILD SUCCESS
-✅ Started CudecaBeApplication
+✅ Total time: X min
+✅ Started CudecaBeApplication in X seconds
 ```
 
 ---
 
-## 🔍 VERIFICACIÓN RÁPIDA
+## ✅ VERIFICACIÓN FINAL
 
-Después del redespliegue, verifica:
+Cuando el despliegue termine, verifica en tu navegador:
 
 ```
-https://tu-backend.up.railway.app/api/eventos
+https://tu-backend-url.up.railway.app/api/eventos
 ```
 
-Debería responder con JSON.
+**Deberías ver:** JSON con la lista de eventos ✅
 
 ---
 
-## 🆘 SI PERSISTE EL ERROR
+## 🆘 SI AÚN HAY ERRORES
 
-**Opción 1: Limpiar caché de Railway**
-1. En Railway → Settings del servicio
-2. Scroll hasta "Danger Zone"
-3. Click "Clear Build Cache"
-4. Redesplegar manualmente
+### Error: "Could not find Java"
+**Solución:** Railway debería instalar JDK automáticamente. Si falla:
+1. Settings → Environment
+2. Añade variable: `NIXPACKS_JDK_VERSION=17`
 
-**Opción 2: Verificar Root Directory**
+### Error: "pom.xml not found"
+**Solución:** Verifica Root Directory:
 1. Settings → Build
-2. Asegúrate de que Root Directory = `CudecaBE`
-3. Guardar
+2. Asegúrate: `Root Directory = CudecaBE`
 
-**Opción 3: Forzar redespliegue**
-```powershell
-git commit --allow-empty -m "Trigger Railway rebuild"
-git push
+### Error: Flyway migration failed
+**Solución:** Verifica las variables de base de datos:
+```
+DATABASE_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/railway
+DB_USERNAME=${{Postgres.PGUSER}}
+DB_PASSWORD=${{Postgres.PGPASSWORD}}
+```
+
+### Build muy lento (más de 10 minutos)
+**Solución:** Es normal la primera vez. Railway descarga:
+- JDK 17 (~100MB)
+- Dependencias Maven (~200MB)
+- Espera hasta 15 minutos la primera vez
+
+---
+
+## 📋 ARCHIVOS DE CONFIGURACIÓN
+
+### `nixpacks.json`
+```json
+{
+  "providers": [],
+  "phases": {
+    "setup": {
+      "nixPkgs": ["jdk17", "maven"]
+    },
+    "build": {
+      "cmds": [
+        "mvn clean package -DskipTests"
+      ]
+    }
+  },
+  "start": {
+    "cmd": "java -Dserver.port=$PORT -jar target/CudecaBE-0.0.1-SNAPSHOT.jar"
+  }
+}
+```
+
+### `railway.toml`
+```toml
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "java -Dserver.port=$PORT -jar target/CudecaBE-0.0.1-SNAPSHOT.jar"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[deploy.healthcheck]
+path = "/api/eventos"
+timeout = 100
 ```
 
 ---
 
-## ✅ ARCHIVOS MODIFICADOS
+## ✅ RESUMEN
 
-```
-CudecaBE/
-├── railway.toml      ← Actualizado con comando correcto
-└── nixpacks.json     ← Nuevo (configuración explícita)
-```
+**Cambios aplicados:**
+- ✅ Configuración explícita de JDK 17 y Maven
+- ✅ Comando de build correcto
+- ✅ Start command optimizado
+- ✅ Healthcheck configurado
+
+**Próximo paso:**
+1. Ejecuta los comandos git arriba
+2. Espera 3-5 minutos
+3. Verifica la URL de tu backend
+4. Si funciona, dime **"siguiente paso"** para continuar con el frontend
 
 ---
 
-**Ejecuta los comandos git y dime cuando hayas hecho push.** 🚀
+**¡Ejecuta los comandos ahora!** 🚀
 
