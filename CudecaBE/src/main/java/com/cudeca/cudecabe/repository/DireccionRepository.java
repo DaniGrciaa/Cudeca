@@ -12,11 +12,11 @@ public interface DireccionRepository extends JpaRepository<Direccion, Integer> {
     /**
      * Busca todas las direcciones de un usuario
      */
-    List<Direccion> findByIdUsuario(Integer idUsuario);
+    List<Direccion> findByUsuario_Id(Integer idUsuario);
 
     /**
      * Elimina todas las direcciones de un usuario
      */
-    void deleteByIdUsuario(Integer idUsuario);
+    void deleteByUsuario_Id(Integer idUsuario);
 }
 

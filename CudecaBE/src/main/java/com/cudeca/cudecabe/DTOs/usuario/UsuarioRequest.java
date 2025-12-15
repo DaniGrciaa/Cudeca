@@ -28,11 +28,6 @@ public class UsuarioRequest {
     @Size(min = 4, max = 200, message = "La contraseña debe tener entre 4 y 200 caracteres")
     private String password;
 
-    @Size(max = 50, message = "El rol no puede exceder 50 caracteres")
-    private String rol;
-
-    // Cantidad total donada por el usuario
-    private BigDecimal cantidadDonada;
 
     // Lista de direcciones del usuario
     private List<DireccionRequest> direcciones;

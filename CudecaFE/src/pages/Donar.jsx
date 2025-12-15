@@ -34,8 +34,27 @@ const Donar = () => {
     setLoading(true);
     
     try {
+      // Obtener el ID del usuario si no lo tiene
+      let userId = user.id;
+      
+      if (!userId) {
+        // Buscar usuario por email
+        const usuarios = await usuariosAPI.getAll();
+        const usuarioCompleto = usuarios.find(u => u.email === user.email);
+        
+        if (!usuarioCompleto) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        userId = usuarioCompleto.id;
+        
+        // Actualizar el localStorage con el ID del usuario
+        const updatedUser = { ...user, id: userId };
+        localStorage.setItem('cudeca_user', JSON.stringify(updatedUser));
+      }
+      
       // Incrementar la donación del usuario
-      await usuariosAPI.incrementarDonacion(user.id, cantidad);
+      await usuariosAPI.incrementarDonacion(userId, cantidad);
       
       alert(`¡Gracias por tu donación de ${cantidad}€! Tu apoyo es fundamental para nuestra causa.`);
       

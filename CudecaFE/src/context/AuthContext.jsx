@@ -99,8 +99,8 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Registrando usuario con datos:', userData);
 
-      // Usar el endpoint de registro que devuelve tokens
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      // Usar el endpoint de usuarios para registro local
+      const response = await fetch('http://localhost:8080/api/usuarios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,21 +124,26 @@ export const AuthProvider = ({ children }) => {
       const responseData = await response.json();
       console.log('Usuario registrado exitosamente:', responseData);
       
-      // Guardar los tokens
-      if (responseData.token) {
-        localStorage.setItem('cudeca_token', responseData.token);
+      // El endpoint /api/usuarios no devuelve tokens, hacer login después del registro
+      const loginResponse = await authAPI.login(userData.email, userData.password);
+      
+      // Guardar los tokens del login
+      if (loginResponse.token) {
+        localStorage.setItem('cudeca_token', loginResponse.token);
       }
-      if (responseData.refreshToken) {
-        localStorage.setItem('cudeca_refresh_token', responseData.refreshToken);
+      if (loginResponse.refreshToken) {
+        localStorage.setItem('cudeca_refresh_token', loginResponse.refreshToken);
       }
 
       // Crear sesión de usuario
       const userSession = {
-        username: responseData.username,
+        id: responseData.id,
+        username: loginResponse.username,
         email: responseData.email,
-        nombre: responseData.username || userData.nombre,
-        rol: responseData.rol,
-        esSocio: responseData.rol === 'SOCIO',
+        nombre: responseData.nombre,
+        telefono: responseData.telefono,
+        rol: loginResponse.rol,
+        esSocio: loginResponse.rol === 'SOCIO',
       };
 
       setUser(userSession);

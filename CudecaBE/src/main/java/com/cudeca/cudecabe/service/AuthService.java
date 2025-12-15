@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public class AuthService {
 
@@ -102,6 +104,16 @@ public class AuthService {
             usuario.setRol("USER");
         }
 
+        // Establecer provider por defecto si no se especifica
+        if (usuario.getProvider() == null || usuario.getProvider().isEmpty()) {
+            usuario.setProvider("LOCAL");
+        }
+
+        // Establecer cantidadDonada por defecto si no se especifica
+        if (usuario.getCantidadDonada() == null) {
+            usuario.setCantidadDonada(BigDecimal.ZERO);
+        }
+
         // Guardar el usuario
         return userRepository.save(usuario);
     }
@@ -111,6 +123,8 @@ public class AuthService {
      */
     @Transactional
     public LoginResponseDTO registrarConDireccion(UsuarioRegisterRequest registerRequest) {
+
+        System.out.println("🔍 [SERVICIO] Iniciando registro de usuario...");
 
         // Verificar que el email no exista
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
@@ -131,38 +145,50 @@ public class AuthService {
         usuario.setTelefono(registerRequest.getTelefono());
         usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         usuario.setRol("USER"); // Rol por defecto
+        usuario.setProvider("LOCAL"); // Provider LOCAL para registro tradicional
+        usuario.setCantidadDonada(BigDecimal.ZERO); // Inicializar en 0
+        usuario.setProfileCompleted(true); // ⭐ Registro LOCAL = Perfil completo
 
         // Guardar el usuario primero para obtener el ID
         usuario = userRepository.save(usuario);
+        System.out.println("✅ [SERVICIO] Usuario guardado con ID: " + usuario.getId());
 
-        // Si hay datos de dirección, crear y guardar la dirección
-        if (registerRequest.getDireccion() != null) {
-            var direccionRequest = registerRequest.getDireccion();
+        // Procesar direcciones (soporta tanto array como campo único para compatibilidad)
+        int direccionesGuardadas = 0;
 
-            // Solo guardar si al menos hay un campo de dirección completo
-            if (direccionRequest.getCalle() != null ||
-                direccionRequest.getCiudad() != null ||
-                direccionRequest.getCodigoPostal() != null) {
+        // Primero intentar con el array de direcciones (preferido)
+        if (registerRequest.getDirecciones() != null && !registerRequest.getDirecciones().isEmpty()) {
+            System.out.println("📍 [SERVICIO] Múltiples direcciones detectadas en el request (" +
+                             registerRequest.getDirecciones().size() + ")");
 
-                Direccion direccion = new Direccion();
-                direccion.setIdUsuario(usuario.getId());
-                direccion.setCalle(direccionRequest.getCalle());
-                direccion.setNumero(direccionRequest.getNumero());
-                direccion.setPiso(direccionRequest.getPiso());
-                direccion.setPuerta(direccionRequest.getPuerta());
-                direccion.setCodigoPostal(direccionRequest.getCodigoPostal());
-                direccion.setCiudad(direccionRequest.getCiudad());
-                direccion.setProvincia(direccionRequest.getProvincia());
-                direccion.setPais(direccionRequest.getPais());
+            for (int i = 0; i < registerRequest.getDirecciones().size(); i++) {
+                var direccionRequest = registerRequest.getDirecciones().get(i);
+                System.out.println("📍 [SERVICIO] Procesando dirección " + (i + 1) + ":");
 
-                direccionRepository.save(direccion);
+                if (guardarDireccion(usuario, direccionRequest)) {
+                    direccionesGuardadas++;
+                }
             }
         }
+        // Si no hay array, intentar con el campo único (para compatibilidad con código existente)
+        else if (registerRequest.getDireccion() != null) {
+            System.out.println("📍 [SERVICIO] Dirección única detectada en el request:");
+
+            if (guardarDireccion(usuario, registerRequest.getDireccion())) {
+                direccionesGuardadas++;
+            }
+        } else {
+            System.out.println("⚠️ [SERVICIO] No se recibió dirección en el request");
+        }
+
+        System.out.println("✅ [SERVICIO] Total de direcciones guardadas: " + direccionesGuardadas);
 
         // Generar tokens para login automático después del registro
         UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
         String token = jwtUtil.generateToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+        System.out.println("✅ [SERVICIO] Registro completado exitosamente");
 
         return new LoginResponseDTO(
             token,
@@ -209,6 +235,47 @@ public class AuthService {
 
         } catch (Exception e) {
             throw new RuntimeException("Error refrescando el token: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Método auxiliar para guardar una dirección asociada a un usuario
+     * @param usuario Usuario al que se le asignará la dirección
+     * @param direccionRequest Datos de la dirección a guardar
+     * @return true si la dirección se guardó exitosamente, false si no tenía datos suficientes
+     */
+    private boolean guardarDireccion(Usuario usuario, com.cudeca.cudecabe.DTOs.direccion.DireccionRequest direccionRequest) {
+        System.out.println("  ├─ Calle: " + direccionRequest.getCalle());
+        System.out.println("  ├─ Número: " + direccionRequest.getNumero());
+        System.out.println("  ├─ Piso: " + direccionRequest.getPiso());
+        System.out.println("  ├─ Puerta: " + direccionRequest.getPuerta());
+        System.out.println("  ├─ CP: " + direccionRequest.getCodigoPostal());
+        System.out.println("  ├─ Ciudad: " + direccionRequest.getCiudad());
+        System.out.println("  ├─ Provincia: " + direccionRequest.getProvincia());
+        System.out.println("  └─ País: " + direccionRequest.getPais());
+
+        // Solo guardar si al menos hay un campo de dirección completo
+        if (direccionRequest.getCalle() != null ||
+            direccionRequest.getCiudad() != null ||
+            direccionRequest.getCodigoPostal() != null) {
+
+            Direccion direccion = new Direccion();
+            direccion.setUsuario(usuario);
+            direccion.setCalle(direccionRequest.getCalle());
+            direccion.setNumero(direccionRequest.getNumero());
+            direccion.setPiso(direccionRequest.getPiso());
+            direccion.setPuerta(direccionRequest.getPuerta());
+            direccion.setCodigoPostal(direccionRequest.getCodigoPostal());
+            direccion.setCiudad(direccionRequest.getCiudad());
+            direccion.setProvincia(direccionRequest.getProvincia());
+            direccion.setPais(direccionRequest.getPais());
+
+            Direccion direccionGuardada = direccionRepository.save(direccion);
+            System.out.println("  ✅ Dirección guardada con ID: " + direccionGuardada.getId());
+            return true;
+        } else {
+            System.out.println("  ⚠️ Dirección recibida pero sin datos suficientes para guardar");
+            return false;
         }
     }
 }

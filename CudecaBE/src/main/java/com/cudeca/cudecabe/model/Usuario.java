@@ -45,10 +45,20 @@ public class Usuario {
     @Column(name = "rol", length = 50)
     private String rol;
 
+    @Size(max = 20)
+    @ColumnDefault("'LOCAL'")
+    @Column(name = "provider", length = 20)
+    private String provider; // LOCAL, GOOGLE, FACEBOOK
+
     @NotNull
     @ColumnDefault("0.00")
     @Column(name = "cantidad_donada", nullable = false, precision = 10, scale = 2)
     private BigDecimal cantidadDonada;
+
+    @NotNull
+    @ColumnDefault("false")
+    @Column(name = "profile_completed", nullable = false)
+    private Boolean profileCompleted;
 
     // Relación con Direccion (un usuario puede tener múltiples direcciones)
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)

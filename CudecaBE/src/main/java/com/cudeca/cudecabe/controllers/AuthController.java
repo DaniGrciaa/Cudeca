@@ -40,10 +40,26 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UsuarioRegisterRequest registerRequest) {
+        System.out.println("📥 [REGISTER] Datos recibidos del frontend:");
+        System.out.println("  ├─ Nombre: " + registerRequest.getNombre());
+        System.out.println("  ├─ Email: " + registerRequest.getEmail());
+        System.out.println("  ├─ Teléfono: " + registerRequest.getTelefono());
+
+        // Mostrar información de direcciones
+        if (registerRequest.getDirecciones() != null && !registerRequest.getDirecciones().isEmpty()) {
+            System.out.println("  └─ Direcciones: " + registerRequest.getDirecciones().size() + " dirección(es)");
+        } else if (registerRequest.getDireccion() != null) {
+            System.out.println("  └─ Dirección: 1 dirección (campo único)");
+        } else {
+            System.out.println("  └─ Dirección: ninguna");
+        }
+
         try {
             LoginResponseDTO response = authService.registrarConDireccion(registerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
+            System.err.println("❌ [REGISTER] Error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(e.getMessage()));
         }

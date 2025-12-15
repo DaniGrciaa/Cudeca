@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.controllers;
 
+import com.cudeca.cudecabe.DTOs.usuario.CompleteProfileRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioResponse;
 import com.cudeca.cudecabe.service.UserService;
@@ -7,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -74,6 +76,18 @@ public class UsuarioController {
             @PathVariable Integer id,
             @RequestParam java.math.BigDecimal cantidad) {
         UsuarioResponse response = usuarioService.incrementarDonacion(id, cantidad);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/complete-profile")
+    public ResponseEntity<UsuarioResponse> completarPerfil(
+            Authentication authentication,
+            @Valid @RequestBody CompleteProfileRequest request) {
+
+        String email = authentication.getName();
+        System.out.println("📥 [COMPLETE-PROFILE] Usuario autenticado: " + email);
+
+        UsuarioResponse response = usuarioService.completarPerfil(email, request);
         return ResponseEntity.ok(response);
     }
 }

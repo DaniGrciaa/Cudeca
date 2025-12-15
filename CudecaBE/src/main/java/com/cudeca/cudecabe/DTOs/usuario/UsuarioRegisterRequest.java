@@ -1,11 +1,14 @@
 package com.cudeca.cudecabe.DTOs.usuario;
 
 import com.cudeca.cudecabe.DTOs.direccion.DireccionRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class UsuarioRegisterRequest {
@@ -30,6 +33,10 @@ public class UsuarioRegisterRequest {
     private String password;
 
     // Datos de dirección (opcionales pero recomendados)
+    // Soporta tanto una dirección única como múltiples direcciones
     private DireccionRequest direccion;
+
+    @Valid
+    private List<DireccionRequest> direcciones;
 }
 

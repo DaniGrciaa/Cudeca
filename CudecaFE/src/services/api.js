@@ -223,6 +223,18 @@ export const usuariosAPI = {
   create: (data) => apiClient.post('/usuarios', data),
   update: (id, data) => apiClient.put(`/usuarios/${id}`, data),
   delete: (id) => apiClient.delete(`/usuarios/${id}`),
+  completeProfile: async (data) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/usuarios/complete-profile`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  },
   incrementarDonacion: async (id, cantidad) => {
     const response = await fetchWithAuth(`${API_BASE_URL}/usuarios/${id}/donar?cantidad=${cantidad}`, {
       method: 'PATCH',
@@ -281,6 +293,14 @@ export const facturasAPI = {
   create: (data) => apiClient.post('/facturas', data),
   update: (id, data) => apiClient.put(`/facturas/${id}`, data),
   delete: (id) => apiClient.delete(`/facturas/${id}`),
+};
+
+// Direcciones API
+export const direccionesAPI = {
+  getByUsuarioId: (usuarioId) => apiClient.get(`/usuarios/${usuarioId}/direcciones`),
+  create: (usuarioId, data) => apiClient.post(`/usuarios/${usuarioId}/direcciones`, data),
+  update: (usuarioId, direccionId, data) => apiClient.put(`/usuarios/${usuarioId}/direcciones/${direccionId}`, data),
+  delete: (usuarioId, direccionId) => apiClient.delete(`/usuarios/${usuarioId}/direcciones/${direccionId}`),
 };
 
 export default apiClient;

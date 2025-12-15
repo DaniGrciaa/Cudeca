@@ -6,6 +6,8 @@ import com.cudeca.cudecabe.model.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class UsuarioMapper {
 
@@ -18,8 +20,32 @@ public class UsuarioMapper {
         usuario.setEmail(request.getEmail());
         usuario.setTelefono(request.getTelefono());
         usuario.setPassword(request.getPassword());
-        usuario.setRol(request.getRol() != null ? request.getRol() : "USER");
-        usuario.setCantidadDonada(request.getCantidadDonada() != null ? request.getCantidadDonada() : java.math.BigDecimal.ZERO);
+        // El backend asigna estos valores por defecto por seguridad
+        usuario.setRol("USER");
+        usuario.setProvider("LOCAL");
+        usuario.setCantidadDonada(java.math.BigDecimal.ZERO);
+
+        // Mapear direcciones si existen en el request
+        if (request.getDirecciones() != null && !request.getDirecciones().isEmpty()) {
+            List<com.cudeca.cudecabe.model.Direccion> direcciones = request.getDirecciones().stream()
+                .map(direccionRequest -> {
+                    com.cudeca.cudecabe.model.Direccion direccion = new com.cudeca.cudecabe.model.Direccion();
+                    direccion.setCalle(direccionRequest.getCalle());
+                    direccion.setNumero(direccionRequest.getNumero());
+                    direccion.setPiso(direccionRequest.getPiso());
+                    direccion.setPuerta(direccionRequest.getPuerta());
+                    direccion.setCodigoPostal(direccionRequest.getCodigoPostal());
+                    direccion.setCiudad(direccionRequest.getCiudad());
+                    direccion.setProvincia(direccionRequest.getProvincia());
+                    direccion.setPais(direccionRequest.getPais());
+                    // Establecer la relación bidireccional
+                    direccion.setUsuario(usuario);
+                    return direccion;
+                })
+                .collect(java.util.stream.Collectors.toList());
+            usuario.setDirecciones(direcciones);
+        }
+
         return usuario;
     }
 
@@ -30,6 +56,7 @@ public class UsuarioMapper {
         response.setEmail(usuario.getEmail());
         response.setTelefono(usuario.getTelefono());
         response.setRol(usuario.getRol());
+        response.setProvider(usuario.getProvider());
         response.setCantidadDonada(usuario.getCantidadDonada());
 
         // Convertir direcciones si existen
@@ -50,12 +77,34 @@ public class UsuarioMapper {
         if (request.getTelefono() != null) {
             usuario.setTelefono(request.getTelefono());
         }
+        
+        // Actualizar direcciones si se proporcionan
+        if (request.getDirecciones() != null) {
+            // Limpiar direcciones existentes
+            if (usuario.getDirecciones() != null) {
+                usuario.getDirecciones().clear();
+            } else {
+                usuario.setDirecciones(new java.util.ArrayList<>());
+            }
+            
+            // Agregar nuevas direcciones
+            request.getDirecciones().forEach(direccionRequest -> {
+                com.cudeca.cudecabe.model.Direccion direccion = new com.cudeca.cudecabe.model.Direccion();
+                direccion.setCalle(direccionRequest.getCalle());
+                direccion.setNumero(direccionRequest.getNumero());
+                direccion.setPiso(direccionRequest.getPiso());
+                direccion.setPuerta(direccionRequest.getPuerta());
+                direccion.setCodigoPostal(direccionRequest.getCodigoPostal());
+                direccion.setCiudad(direccionRequest.getCiudad());
+                direccion.setProvincia(direccionRequest.getProvincia());
+                direccion.setPais(direccionRequest.getPais());
+                direccion.setUsuario(usuario);
+                usuario.getDirecciones().add(direccion);
+            });
+        }
+        
         // La contraseña se maneja en el servicio con encriptación
-        if (request.getRol() != null) {
-            usuario.setRol(request.getRol());
-        }
-        if (request.getCantidadDonada() != null) {
-            usuario.setCantidadDonada(request.getCantidadDonada());
-        }
+        // Nota: rol, provider y cantidadDonada NO se pueden modificar desde requests normales
+        // Estos campos solo se gestionan internamente por el backend
     }
 }

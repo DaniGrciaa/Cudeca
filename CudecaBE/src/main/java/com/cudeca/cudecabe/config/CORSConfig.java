@@ -20,6 +20,19 @@ public class CORSConfig {
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
+
+                // Permitir OAuth2 endpoints
+                registry.addMapping("/oauth2/**")
+                        .allowedOrigins("http://localhost:3000", "http://localhost:5173")
+                        .allowedMethods("GET", "POST", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+
+                registry.addMapping("/login/oauth2/**")
+                        .allowedOrigins("http://localhost:3000", "http://localhost:5173")
+                        .allowedMethods("GET", "POST", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

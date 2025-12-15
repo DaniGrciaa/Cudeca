@@ -64,7 +64,7 @@ const Header = () => {
                   aria-label="Mi Perfil"
                 >
                   <User className="w-6 h-6 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
-                  <span className="text-sm font-medium text-gray-700">{user?.nombre}</span>
+                  <span className="text-sm font-medium text-gray-700">{user?.nombre?.split(' ')[0]}</span>
                 </Link>
                 <button
                   onClick={handleLogout}

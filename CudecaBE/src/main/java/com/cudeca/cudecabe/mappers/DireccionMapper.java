@@ -36,13 +36,13 @@ public class DireccionMapper {
     /**
      * Convierte un DireccionRequest a entidad Direccion
      */
-    public Direccion toEntity(DireccionRequest request, Integer idUsuario) {
+    public Direccion toEntity(DireccionRequest request, com.cudeca.cudecabe.model.Usuario usuario) {
         if (request == null) {
             return null;
         }
 
         Direccion direccion = new Direccion();
-        direccion.setIdUsuario(idUsuario);
+        direccion.setUsuario(usuario);
         direccion.setCalle(request.getCalle());
         direccion.setNumero(request.getNumero());
         direccion.setPiso(request.getPiso());

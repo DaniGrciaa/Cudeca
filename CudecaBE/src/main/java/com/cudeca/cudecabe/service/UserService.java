@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.service;
 
+import com.cudeca.cudecabe.DTOs.usuario.CompleteProfileRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioResponse;
 
@@ -16,4 +17,5 @@ public interface UserService {
     List<UsuarioResponse> obtenerUsuariosPorRol(String rol);
     List<UsuarioResponse> buscarUsuariosPorNombre(String nombre);
     UsuarioResponse incrementarDonacion(Integer id, BigDecimal cantidad);
+    UsuarioResponse completarPerfil(String email, CompleteProfileRequest request);
 }

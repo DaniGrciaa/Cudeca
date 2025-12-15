@@ -52,7 +52,6 @@ class UsuarioServiceTest {
         usuarioRequest.setEmail("juan@example.com");
         usuarioRequest.setTelefono("123456789");
         usuarioRequest.setPassword("password123");
-        usuarioRequest.setRol("USER");
 
         usuarioResponse = new UsuarioResponse();
         usuarioResponse.setId(1);

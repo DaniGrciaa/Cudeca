@@ -23,7 +23,7 @@ class UsuarioMapperTest {
         usuarioRequest.setEmail("maria@example.com");
         usuarioRequest.setTelefono("987654321");
         usuarioRequest.setPassword("password123");
-        usuarioRequest.setRol("ADMIN");
+        // Nota: rol ya no se asigna desde el request, el backend lo gestiona
 
         usuario = new Usuario();
         usuario.setId(1);
@@ -31,7 +31,7 @@ class UsuarioMapperTest {
         usuario.setEmail("maria@example.com");
         usuario.setTelefono("987654321");
         usuario.setPassword("password123");
-        usuario.setRol("ADMIN");
+        usuario.setRol("USER");
     }
 
     @Test
@@ -43,22 +43,26 @@ class UsuarioMapperTest {
         assertEquals(usuarioRequest.getEmail(), result.getEmail());
         assertEquals(usuarioRequest.getTelefono(), result.getTelefono());
         assertEquals(usuarioRequest.getPassword(), result.getPassword());
-        assertEquals(usuarioRequest.getRol(), result.getRol());
+        // El backend asigna el rol por defecto
+        assertEquals("USER", result.getRol());
+        assertEquals("LOCAL", result.getProvider());
     }
 
     @Test
-    void testToEntity_WithDefaultRol() {
-        UsuarioRequest requestSinRol = new UsuarioRequest();
-        requestSinRol.setNombre("Pedro López");
-        requestSinRol.setEmail("pedro@example.com");
-        requestSinRol.setTelefono("111222333");
-        requestSinRol.setPassword("pass123");
-        requestSinRol.setRol(null);
+    void testToEntity_AlwaysAssignsDefaultValues() {
+        UsuarioRequest requestBasico = new UsuarioRequest();
+        requestBasico.setNombre("Pedro López");
+        requestBasico.setEmail("pedro@example.com");
+        requestBasico.setTelefono("111222333");
+        requestBasico.setPassword("pass123");
+        // No se envía rol, provider ni cantidadDonada desde el request
 
-        Usuario result = usuarioMapper.toEntity(requestSinRol);
+        Usuario result = usuarioMapper.toEntity(requestBasico);
 
         assertNotNull(result);
         assertEquals("USER", result.getRol());
+        assertEquals("LOCAL", result.getProvider());
+        assertEquals(java.math.BigDecimal.ZERO, result.getCantidadDonada());
     }
 
     @Test
@@ -90,14 +94,16 @@ class UsuarioMapperTest {
         updateRequest.setNombre("María García Actualizada");
         updateRequest.setEmail("maria.nueva@example.com");
         updateRequest.setTelefono("999888777");
-        updateRequest.setRol("SUPERADMIN");
+        // Nota: rol ya no se puede actualizar desde request por seguridad
 
+        String rolOriginal = usuario.getRol();
         usuarioMapper.updateEntity(updateRequest, usuario);
 
         assertEquals("María García Actualizada", usuario.getNombre());
         assertEquals("maria.nueva@example.com", usuario.getEmail());
         assertEquals("999888777", usuario.getTelefono());
-        assertEquals("SUPERADMIN", usuario.getRol());
+        // El rol no debe cambiar
+        assertEquals(rolOriginal, usuario.getRol());
     }
 
     @Test
@@ -107,14 +113,16 @@ class UsuarioMapperTest {
         updateRequest.setEmail(null);
         updateRequest.setTelefono(null);
         updateRequest.setPassword(null);
-        updateRequest.setRol(null);
+        // rol no se puede enviar desde el request
 
         String emailOriginal = usuario.getEmail();
+        String rolOriginal = usuario.getRol();
 
         usuarioMapper.updateEntity(updateRequest, usuario);
 
         assertEquals("Nuevo Nombre", usuario.getNombre());
         assertEquals(emailOriginal, usuario.getEmail());
+        assertEquals(rolOriginal, usuario.getRol());
     }
 
     @Test

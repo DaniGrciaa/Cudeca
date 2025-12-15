@@ -1,5 +1,6 @@
 package com.cudeca.cudecabe.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,11 +22,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                         UserDetailsService userDetailsService) {
+                         UserDetailsService userDetailsService,
+                         OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -55,17 +59,38 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No usar sesiones
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        // Devolver 401 en JSON en lugar de redirigir
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\":\"No autorizado\",\"message\":\""
+                                + authException.getMessage() + "\"}");
+                        })
+                        // Devolver 403 en JSON
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"error\":\"Acceso denegado\",\"message\":\""
+                                + accessDeniedException.getMessage() + "\"}");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos (sin autenticación)
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll() // Test endpoints
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() // OAuth2 endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/eventos/**").permitAll() // Los eventos son públicos
                         .requestMatchers("/api/patrocinadores/**").permitAll() // Los patrocinadores son públicos
-                        .requestMatchers("/api/usuarios/**").permitAll() // Los usuarios son públicos
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios").permitAll() // Registro de usuarios público
                         .requestMatchers("/api/compras/**").permitAll() // Las compras son públicas
 
                         // Todos los demás endpoints requieren autenticación
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

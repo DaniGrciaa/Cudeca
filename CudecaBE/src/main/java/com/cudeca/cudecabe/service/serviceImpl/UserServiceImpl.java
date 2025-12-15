@@ -1,9 +1,12 @@
 package com.cudeca.cudecabe.service.serviceImpl;
 
+import com.cudeca.cudecabe.DTOs.usuario.CompleteProfileRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioRequest;
 import com.cudeca.cudecabe.DTOs.usuario.UsuarioResponse;
 import com.cudeca.cudecabe.mappers.UsuarioMapper;
+import com.cudeca.cudecabe.model.Direccion;
 import com.cudeca.cudecabe.model.Usuario;
+import com.cudeca.cudecabe.repository.DireccionRepository;
 import com.cudeca.cudecabe.repository.UserRepository;
 import com.cudeca.cudecabe.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +23,25 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository usuarioRepository;
+    private final DireccionRepository direccionRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public UsuarioResponse crearUsuario(UsuarioRequest request) {
+        System.out.println("=== CREAR USUARIO ===");
+        System.out.println("Email: " + request.getEmail());
+        System.out.println("Nombre: " + request.getNombre());
+        System.out.println("Direcciones recibidas: " + (request.getDirecciones() != null ? request.getDirecciones().size() : "null"));
+        if (request.getDirecciones() != null) {
+            request.getDirecciones().forEach(dir -> {
+                System.out.println("  - Calle: " + dir.getCalle());
+                System.out.println("  - Ciudad: " + dir.getCiudad());
+                System.out.println("  - CP: " + dir.getCodigoPostal());
+            });
+        }
+        
         // Validar que el email no exista
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
@@ -33,9 +49,15 @@ public class UserServiceImpl implements UserService {
 
 
         Usuario usuario = usuarioMapper.toEntity(request);
+        System.out.println("Usuario mapeado, direcciones: " + (usuario.getDirecciones() != null ? usuario.getDirecciones().size() : "null"));
+        
         // Encriptar la contraseña antes de guardar
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         Usuario savedUsuario = usuarioRepository.save(usuario);
+        
+        System.out.println("Usuario guardado con ID: " + savedUsuario.getId());
+        System.out.println("Direcciones guardadas: " + (savedUsuario.getDirecciones() != null ? savedUsuario.getDirecciones().size() : "null"));
+        
         return usuarioMapper.toResponse(savedUsuario);
     }
 
@@ -129,6 +151,67 @@ public class UserServiceImpl implements UserService {
         usuario.setCantidadDonada(cantidadActual.add(cantidad));
 
         Usuario updatedUsuario = usuarioRepository.save(usuario);
+        return usuarioMapper.toResponse(updatedUsuario);
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse completarPerfil(String email, CompleteProfileRequest request) {
+        System.out.println("📝 [SERVICIO] Completando perfil de usuario OAuth2: " + email);
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+
+        System.out.println("  ├─ Usuario encontrado ID: " + usuario.getId());
+        System.out.println("  ├─ Provider: " + usuario.getProvider());
+        System.out.println("  └─ Profile Completed actual: " + usuario.getProfileCompleted());
+
+        // Actualizar teléfono si se proporciona
+        if (request.getTelefono() != null && !request.getTelefono().trim().isEmpty()) {
+            usuario.setTelefono(request.getTelefono());
+            System.out.println("  ✅ Teléfono actualizado: " + request.getTelefono());
+        }
+
+        // Actualizar nombre si se proporciona
+        if (request.getNombre() != null && !request.getNombre().trim().isEmpty()) {
+            usuario.setNombre(request.getNombre());
+            System.out.println("  ✅ Nombre actualizado: " + request.getNombre());
+        }
+
+        // Guardar direcciones si se proporcionan
+        if (request.getDirecciones() != null && !request.getDirecciones().isEmpty()) {
+            System.out.println("  📍 Guardando " + request.getDirecciones().size() + " direcciones");
+
+            for (var direccionRequest : request.getDirecciones()) {
+                // Solo guardar si al menos hay un campo de dirección completo
+                if (direccionRequest.getCalle() != null ||
+                    direccionRequest.getCiudad() != null ||
+                    direccionRequest.getCodigoPostal() != null) {
+
+                    Direccion direccion = new Direccion();
+                    direccion.setUsuario(usuario);
+                    direccion.setCalle(direccionRequest.getCalle());
+                    direccion.setNumero(direccionRequest.getNumero());
+                    direccion.setPiso(direccionRequest.getPiso());
+                    direccion.setPuerta(direccionRequest.getPuerta());
+                    direccion.setCodigoPostal(direccionRequest.getCodigoPostal());
+                    direccion.setCiudad(direccionRequest.getCiudad());
+                    direccion.setProvincia(direccionRequest.getProvincia());
+                    direccion.setPais(direccionRequest.getPais());
+
+                    direccionRepository.save(direccion);
+                    System.out.println("    ✅ Dirección guardada: " + direccionRequest.getCalle());
+                }
+            }
+        }
+
+        // ⭐ Marcar el perfil como completado
+        usuario.setProfileCompleted(true);
+        System.out.println("  ⭐ Profile Completed actualizado a: true");
+
+        Usuario updatedUsuario = usuarioRepository.save(usuario);
+        System.out.println("✅ [SERVICIO] Perfil completado exitosamente");
+
         return usuarioMapper.toResponse(updatedUsuario);
     }
 }

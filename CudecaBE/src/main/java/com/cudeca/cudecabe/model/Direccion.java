@@ -1,7 +1,6 @@
 package com.cudeca.cudecabe.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,9 +16,6 @@ public class Direccion {
     @Column(name = "id_direccion", nullable = false)
     private Integer id;
 
-    @NotNull
-    @Column(name = "id_usuario", nullable = false)
-    private Integer idUsuario;
 
     @Size(max = 200)
     @Column(name = "calle", length = 200)
@@ -55,7 +51,7 @@ public class Direccion {
 
     // Relación con Usuario
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", insertable = false, updatable = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 }
 

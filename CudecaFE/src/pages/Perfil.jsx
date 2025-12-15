@@ -31,8 +31,25 @@ const Perfil = () => {
       try {
         setLoading(true);
         
-        // Obtener datos completos del usuario desde el backend para tener cantidadDonada actualizada
-        const usuarioCompleto = await usuariosAPI.getById(user.id);
+        // Obtener datos completos del usuario desde el backend
+        // Si tenemos ID, usar getById, sino buscar por email en todos los usuarios
+        let usuarioCompleto;
+        
+        if (user.id) {
+          usuarioCompleto = await usuariosAPI.getById(user.id);
+        } else {
+          // Buscar usuario por email
+          const usuarios = await usuariosAPI.getAll();
+          usuarioCompleto = usuarios.find(u => u.email === user.email);
+          
+          if (!usuarioCompleto) {
+            throw new Error('Usuario no encontrado');
+          }
+          
+          // Actualizar el localStorage con el ID del usuario
+          const updatedUser = { ...user, id: usuarioCompleto.id };
+          localStorage.setItem('cudeca_user', JSON.stringify(updatedUser));
+        }
         
         // Usar datos del usuario del backend
         const transformedProfile = {
@@ -52,6 +69,20 @@ const Perfil = () => {
         setTotalDonado(usuarioCompleto.cantidadDonada || 0);
       } catch (err) {
         console.error('Error al cargar datos del usuario:', err);
+        // Si el error es de autenticación, usar datos del localStorage
+        const transformedProfile = {
+          nombre: user.nombre || user.username || 'Sin nombre',
+          email: user.email,
+          ciudad: user.direccion?.ciudad || 'No especificada',
+          socio: user.rol === 'SOCIO' ? 'Sí - Socio de Cudeca' : 'Usuario registrado',
+          telefono: user.telefono || 'No especificado',
+          direccion: user.direccion?.calle || 'No especificada',
+          codigoPostal: user.direccion?.codigoPostal || ''
+        };
+        
+        setProfileData(transformedProfile);
+        setEditData(transformedProfile);
+        setTotalDonado(0);
       } finally {
         setLoading(false);
       }

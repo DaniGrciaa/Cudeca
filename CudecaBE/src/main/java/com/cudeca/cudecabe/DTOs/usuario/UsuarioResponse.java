@@ -13,6 +13,8 @@ public class UsuarioResponse {
     private String email;
     private String telefono;
     private String rol;
+    private String provider; // LOCAL, GOOGLE, FACEBOOK
     private BigDecimal cantidadDonada;
+    private Boolean profileCompleted;
     private List<DireccionResponse> direcciones;
 }

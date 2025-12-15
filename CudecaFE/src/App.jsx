@@ -13,10 +13,9 @@ import HazteSocio from './pages/HazteSocio';
 import Carrito from './pages/Carrito';
 import Perfil from './pages/Perfil';
 import Login from './pages/Login';
+import OAuth2Redirect from './pages/OAuth2Redirect';
+import CompleteProfile from './pages/CompleteProfile';
 import Donar from './pages/Donar';
-import Privacidad from './pages/Privacidad';
-import Terminos from './pages/Terminos';
-import Cookies from './pages/Cookies';
 
 function App() {
   return (
@@ -37,11 +36,10 @@ function App() {
                 <Route path="/carrito" element={<Carrito />} />
                 <Route path="/perfil" element={<Perfil />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
+                <Route path="/complete-profile" element={<CompleteProfile />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/thank-you" element={<ThankYou />} />
-                <Route path="/privacidad" element={<Privacidad />} />
-                <Route path="/terminos" element={<Terminos />} />
-                <Route path="/cookies" element={<Cookies />} />
               </Routes>
             </main>
             <Footer />
