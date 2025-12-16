@@ -84,7 +84,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/eventos/**").permitAll() // Los eventos son públicos
                         .requestMatchers("/api/patrocinadores/**").permitAll() // Los patrocinadores son públicos
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios").permitAll() // Registro de usuarios público
-                        .requestMatchers("/api/compras/**").permitAll() // Las compras son públicas
 
                         // Todos los demás endpoints requieren autenticación
                         .anyRequest().authenticated()
