@@ -173,7 +173,7 @@ const HazteSocio = () => {
           <div className="mb-8">
             <button
               type="button"
-              onClick={() => window.location.href = 'http://localhost:8080/oauth2/authorization/google'}
+              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`}
               className="w-full bg-white border-2 border-gray-300 text-gray-700 font-bold py-4 px-4 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-3 shadow-md"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
