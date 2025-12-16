@@ -82,7 +82,6 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() // OAuth2 endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/eventos/**").permitAll() // Los eventos son públicos
-                        .requestMatchers("/api/patrocinadores/**").permitAll() // Los patrocinadores son públicos
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios").permitAll() // Registro de usuarios público
 
                         // Todos los demás endpoints requieren autenticación
