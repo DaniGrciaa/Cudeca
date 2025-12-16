@@ -9,21 +9,17 @@ const OAuth2Redirect = () => {
   const [status, setStatus] = useState('processing'); // processing, success, error
 
   useEffect(() => {
-    // Extraer tokens y parámetros de la URL
+    // Extraer tokens de la URL
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
     const refreshToken = params.get('refreshToken');
-    const profileCompleted = params.get('profileCompleted') === 'true';
-    const isNewUser = params.get('isNewUser') === 'true';
 
     console.log('OAuth2 Redirect - Token:', token ? 'Recibido' : 'No recibido');
     console.log('OAuth2 Redirect - RefreshToken:', refreshToken ? 'Recibido' : 'No recibido');
-    console.log('OAuth2 Redirect - profileCompleted:', profileCompleted);
-    console.log('OAuth2 Redirect - isNewUser:', isNewUser);
 
     if (token && refreshToken) {
       try {
-        // Guardar tokens en localStorage
+        // Guardar tokens en localStorage con las mismas claves que usa AuthContext
         localStorage.setItem('cudeca_token', token);
         localStorage.setItem('cudeca_refresh_token', refreshToken);
 
@@ -32,7 +28,7 @@ const OAuth2Redirect = () => {
         
         console.log('Payload del token:', payload);
         
-        // Crear objeto de usuario
+        // Crear objeto de usuario con la misma estructura que usa AuthContext
         const userData = {
           username: payload.sub,
           email: payload.sub,
@@ -41,21 +37,19 @@ const OAuth2Redirect = () => {
           esSocio: payload.roles && payload.roles.includes('SOCIO'),
         };
         
+        // Guardar usuario en localStorage con la misma clave que usa AuthContext
         localStorage.setItem('cudeca_user', JSON.stringify(userData));
+        
+        // Marcar que el usuario necesita completar su perfil
+        localStorage.setItem('needs_profile_completion', 'true');
 
         console.log('Usuario guardado:', userData);
 
         setStatus('success');
         
-        // Redirigir según el estado del perfil
+        // Redirigir a completar perfil después de 1 segundo
         setTimeout(() => {
-          if (!profileCompleted) {
-            console.log('OAuth2 Redirect - Perfil incompleto, redirigiendo a complete-profile');
-            navigate('/complete-profile');
-          } else {
-            console.log('OAuth2 Redirect - Perfil completo, redirigiendo a perfil');
-            navigate('/perfil');
-          }
+          navigate('/complete-profile');
         }, 1000);
 
       } catch (error) {
@@ -101,10 +95,10 @@ const OAuth2Redirect = () => {
           <>
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              ¡Autenticación exitosa!
+              ¡Inicio de sesión exitoso!
             </h2>
             <p className="text-gray-600">
-              Redirigiendo...
+              Redirigiendo a tu perfil...
             </p>
           </>
         )}

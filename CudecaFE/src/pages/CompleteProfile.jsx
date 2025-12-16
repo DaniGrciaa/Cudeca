@@ -9,8 +9,6 @@ const CompleteProfile = () => {
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellidos: '',
     telefono: '',
     direccion: {
       calle: '',
@@ -30,14 +28,18 @@ const CompleteProfile = () => {
     const savedToken = localStorage.getItem('cudeca_token');
     
     if (!savedUser || !savedToken) {
-      console.log('CompleteProfile - No autenticado, redirigiendo a login');
       navigate('/login');
       return;
     }
     
     const user = JSON.parse(savedUser);
     setUserData(user);
-    console.log('CompleteProfile - Usuario cargado:', user);
+    
+    // Si el usuario ya tiene estos datos, redirigir al perfil
+    const needsProfileCompletion = localStorage.getItem('needs_profile_completion');
+    if (!needsProfileCompletion) {
+      navigate('/perfil');
+    }
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -61,7 +63,8 @@ const CompleteProfile = () => {
   };
 
   const handleSkip = () => {
-    console.log('CompleteProfile - Usuario omitió completar perfil');
+    // Remover la marca de que necesita completar el perfil
+    localStorage.removeItem('needs_profile_completion');
     navigate('/perfil');
   };
 
@@ -70,6 +73,14 @@ const CompleteProfile = () => {
     setLoading(true);
 
     try {
+      // Obtener todos los usuarios para encontrar el ID del usuario actual
+      const usuarios = await usuariosAPI.getAll();
+      const usuarioActual = usuarios.find(u => u.email === userData.email);
+      
+      if (!usuarioActual) {
+        throw new Error('Usuario no encontrado');
+      }
+
       // Preparar el objeto de dirección solo si hay datos
       const tieneDireccion = formData.direccion.calle || 
                             formData.direccion.ciudad || 
@@ -90,32 +101,30 @@ const CompleteProfile = () => {
         direccionesArray.push(direccionParaEnviar);
       }
 
-      // Preparar nombre completo
-      const nombreCompleto = formData.apellidos 
-        ? `${formData.nombre} ${formData.apellidos}`
-        : formData.nombre || userData.nombre || userData.email.split('@')[0];
-
-      // Preparar datos según el nuevo endpoint /api/usuarios/complete-profile
-      const datosCompleteProfile = {
+      // Preparar datos para actualizar el usuario
+      const datosActualizados = {
+        nombre: usuarioActual.nombre,
+        email: usuarioActual.email,
+        password: 'unchangedpassword123',
         telefono: formData.telefono ? formData.telefono.replace(/\s/g, '') : '',
-        nombre: nombreCompleto,
         direcciones: direccionesArray
       };
 
-      console.log('Completando perfil con:', JSON.stringify(datosCompleteProfile, null, 2));
+      console.log('Actualizando usuario con:', JSON.stringify(datosActualizados, null, 2));
 
-      // Llamar al endpoint de completar perfil
-      const response = await usuariosAPI.completeProfile(datosCompleteProfile);
-
-      console.log('Perfil completado exitosamente:', response);
+      // Actualizar el usuario (incluye teléfono y direcciones en una sola petición)
+      await usuariosAPI.update(usuarioActual.id, datosActualizados);
 
       // Actualizar los datos locales del usuario
       const updatedUser = {
         ...userData,
         telefono: formData.telefono || null,
-        nombre: datosCompleteProfile.nombre
+        id: usuarioActual.id
       };
       localStorage.setItem('cudeca_user', JSON.stringify(updatedUser));
+
+      // Remover la marca de que necesita completar el perfil
+      localStorage.removeItem('needs_profile_completion');
 
       alert('¡Perfil completado exitosamente!');
       navigate('/perfil');
@@ -183,50 +192,8 @@ const CompleteProfile = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nombre y Apellidos */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-cudeca-darkGreen" />
-                Información Personal
-              </h3>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="nombre" className="block text-sm font-semibold text-gray-900 mb-1">
-                    Nombre
-                  </label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-cudeca-mediumGreen focus:outline-none transition-colors"
-                    placeholder="Tu nombre"
-                    maxLength="50"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="apellidos" className="block text-sm font-semibold text-gray-900 mb-1">
-                    Apellidos
-                  </label>
-                  <input
-                    type="text"
-                    id="apellidos"
-                    name="apellidos"
-                    value={formData.apellidos}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-cudeca-mediumGreen focus:outline-none transition-colors"
-                    placeholder="Tus apellidos"
-                    maxLength="50"
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Teléfono */}
-            <div className="pt-4 border-t border-gray-200">
+            <div>
               <label htmlFor="telefono" className="block text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <Phone className="w-5 h-5 text-cudeca-darkGreen" />
                 Teléfono de Contacto

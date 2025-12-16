@@ -22,41 +22,11 @@ const Carrito = () => {
   const total = subtotal + fees;
 
   const handleCheckout = async () => {
-    try {
-      // Por ahora usamos un ID de usuario fijo - en producción vendría de la autenticación
-      const userId = 1;
-      
-      // Crear una compra por cada item en el carrito
-      for (const item of cartItems) {
-        const nuevaCompra = {
-          usuarioId: userId,
-          eventoId: item.id,
-          cantidadEntradas: item.quantity,
-          precioTotal: item.price * item.quantity,
-          metodoPago: selectedPaymentMethod === 'existing' ? 'tarjeta' : selectedPaymentMethod,
-          estadoPago: 'Completado',
-          fechaCompra: new Date().toISOString()
-        };
-        
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/compras`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(nuevaCompra),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Error al procesar la compra');
-        }
-      }
-      
-      alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
-      clearCart(); // Vaciar carrito
-    } catch (err) {
-      console.error('Error al procesar pago:', err);
-      alert('Hubo un error al procesar tu pago. Por favor, inténtalo de nuevo.');
-    }
+    // Simulación de pago - siempre exitosa
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
+    clearCart(); // Vaciar carrito
   };
 
   if (cartItems.length === 0) {
