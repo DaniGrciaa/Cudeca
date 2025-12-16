@@ -24,6 +24,7 @@ public class UsuarioMapper {
         usuario.setRol("USER");
         usuario.setProvider("LOCAL");
         usuario.setCantidadDonada(java.math.BigDecimal.ZERO);
+        usuario.setProfileCompleted(true); // Los usuarios locales completan el perfil al registrarse
 
         // Mapear direcciones si existen en el request
         if (request.getDirecciones() != null && !request.getDirecciones().isEmpty()) {

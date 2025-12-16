@@ -53,12 +53,12 @@ public class Usuario {
     @NotNull
     @ColumnDefault("0.00")
     @Column(name = "cantidad_donada", nullable = false, precision = 10, scale = 2)
-    private BigDecimal cantidadDonada;
+    private BigDecimal cantidadDonada = BigDecimal.ZERO;
 
     @NotNull
     @ColumnDefault("false")
     @Column(name = "profile_completed", nullable = false)
-    private Boolean profileCompleted;
+    private Boolean profileCompleted = false;
 
     // Relación con Direccion (un usuario puede tener múltiples direcciones)
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
