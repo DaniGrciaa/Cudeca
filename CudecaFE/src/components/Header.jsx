@@ -22,8 +22,12 @@ const Header = () => {
     { name: 'Eventos', href: '/eventos' },
     { name: 'Donar', href: '/donar' },
     { name: 'About Us', href: '/about-us' },
-    { name: 'Hazte Socio', href: '/hazte-socio' },
   ];
+
+  // Solo mostrar "Hazte Socio" si el usuario NO está autenticado
+  const navigationItems = isAuthenticated 
+    ? navigation 
+    : [...navigation, { name: 'Hazte Socio', href: '/hazte-socio' }];
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50" role="banner">
@@ -45,7 +49,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
+            {navigationItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
@@ -125,7 +129,7 @@ const Header = () => {
               className="md:hidden pb-4"
             >
               <div className="flex flex-col space-y-3">
-                {navigation.map((item) => (
+                {navigationItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
