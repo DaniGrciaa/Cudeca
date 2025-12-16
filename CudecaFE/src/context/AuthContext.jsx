@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Registrando usuario con datos:', userData);
 
       // Usar el endpoint de usuarios para registro local
-      const response = await fetch('http://localhost:8080/api/usuarios', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/usuarios`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

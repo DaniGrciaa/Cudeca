@@ -38,7 +38,7 @@ const Carrito = () => {
           fechaCompra: new Date().toISOString()
         };
         
-        const response = await fetch('http://localhost:8080/api/compras', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/compras`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

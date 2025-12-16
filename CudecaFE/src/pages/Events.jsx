@@ -67,7 +67,7 @@ const Events = () => {
         console.log(`Cargados ${transformedEvents.length} eventos desde el backend`);
       } catch (err) {
         console.error('Error al cargar eventos:', err);
-        setError('No se pudo conectar con el backend. Por favor, verifica que el servidor esté ejecutándose en http://localhost:8080');
+        setError('No se pudo conectar con el backend. Por favor, intenta de nuevo más tarde.');
         setEventos([]);
       } finally {
         setLoading(false);
