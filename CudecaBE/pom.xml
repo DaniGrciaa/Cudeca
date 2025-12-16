@@ -131,9 +131,14 @@
     </dependencies>
 
     <build>
-        <plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
 
-            <!-- Compilador: Java 21, sin preview -->
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -150,8 +155,6 @@
                 </configuration>
             </plugin>
 
-
-            <!-- Plugin Spring Boot para generar el .jar ejecutable -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -164,7 +167,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
