@@ -249,7 +249,7 @@ const Home = () => {
 
                 {/* CTA Donar */}
                 <a
-                  href="/hazte-socio"
+                  href="/donar"
                   className="block w-full text-center bg-cudeca-mediumGreen text-white font-bold py-3 px-6 rounded-lg hover:bg-cudeca-darkGreen transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-cudeca-mediumGreen focus:ring-offset-2"
                 >
                   Donar Ahora

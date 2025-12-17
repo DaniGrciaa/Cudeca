@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
@@ -22,6 +23,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router>
+          <ScrollToTop />
           <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex-grow">

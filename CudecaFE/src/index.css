@@ -10,6 +10,39 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
   }
+
+  /* Evitar que el cursor de texto aparezca en elementos no editables */
+  * {
+    cursor: default;
+  }
+
+  /* Cursor de texto solo en elementos editables */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
+  /* Cursor pointer para elementos clicables */
+  button,
+  a,
+  [role="button"],
+  select {
+    cursor: pointer;
+  }
+
+  /* Permitir selección de texto en contenido legible */
+  p,
+  li,
+  td,
+  th,
+  span,
+  div {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
   
   /* Accesibilidad: mejora de contraste y tamaños */
   button:focus-visible,
