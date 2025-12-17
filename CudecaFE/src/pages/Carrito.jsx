@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, CreditCard, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { comprasEventosAPI } from '../services/api';
 
 const Carrito = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('existing');
   const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const removeItem = (id) => {
     removeFromCart(id);
@@ -22,11 +27,39 @@ const Carrito = () => {
   const total = subtotal + fees;
 
   const handleCheckout = async () => {
-    // Simulación de pago - siempre exitosa
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Verificar autenticación
+    if (!isAuthenticated || !user) {
+      alert('Debes iniciar sesión para completar la compra');
+      navigate('/login');
+      return;
+    }
+
+    setIsProcessing(true);
     
-    alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
-    clearCart(); // Vaciar carrito
+    try {
+      // Construir el JSON esperado por el backend
+      const compraData = {
+        eventos: cartItems.map(item => ({
+          eventoId: item.id,
+          cantidadEntradas: item.quantity,
+          precioTotal: parseFloat((item.price * item.quantity).toFixed(2))
+        }))
+      };
+      
+      // Enviar la compra al backend
+      await comprasEventosAPI.comprarEventos(compraData);
+      
+      alert('¡Compra realizada con éxito! Recibirás un email de confirmación pronto.');
+      clearCart();
+      
+      // Redirigir al perfil para ver las compras
+      navigate('/perfil');
+    } catch (error) {
+      console.error('Error al procesar la compra:', error);
+      alert('Hubo un error al procesar tu compra. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (cartItems.length === 0) {
@@ -252,10 +285,15 @@ const Carrito = () => {
               {/* Botón de pago */}
               <button
                 onClick={handleCheckout}
-                className="w-full bg-cudeca-darkGreen text-white font-bold py-4 px-6 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl text-xl focus:outline-none focus:ring-4 focus:ring-cudeca-darkGreen focus:ring-offset-2 flex items-center justify-center gap-3"
+                disabled={isProcessing}
+                className={`w-full bg-cudeca-darkGreen text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg text-xl focus:outline-none focus:ring-4 focus:ring-cudeca-darkGreen focus:ring-offset-2 flex items-center justify-center gap-3 ${
+                  isProcessing 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-green-700 hover:shadow-xl'
+                }`}
               >
-                PAGAR
-                <ArrowRight className="w-6 h-6" aria-hidden="true" />
+                {isProcessing ? 'PROCESANDO...' : 'PAGAR'}
+                {!isProcessing && <ArrowRight className="w-6 h-6" aria-hidden="true" />}
               </button>
 
               <p className="mt-4 text-sm text-center text-gray-600">

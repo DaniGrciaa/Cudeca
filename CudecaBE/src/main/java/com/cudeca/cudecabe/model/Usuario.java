@@ -63,4 +63,8 @@ public class Usuario {
     // Relación con Direccion (un usuario puede tener múltiples direcciones)
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Direccion> direcciones;
+
+    // Relación con CompraEvento (un usuario puede tener múltiples compras de eventos)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompraEvento> comprasEventos;
 }

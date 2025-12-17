@@ -291,4 +291,11 @@ export const direccionesAPI = {
   delete: (usuarioId, direccionId) => apiClient.delete(`/usuarios/${usuarioId}/direcciones/${direccionId}`),
 };
 
+// Compras de Eventos API
+export const comprasEventosAPI = {
+  comprarEventos: (data) => apiClient.post('/compras-eventos', data),
+  getMisEventos: () => apiClient.get('/compras-eventos/mis-eventos'),
+  verificarCompra: (eventoId) => apiClient.get(`/compras-eventos/verificar/evento/${eventoId}`),
+};
+
 export default apiClient;

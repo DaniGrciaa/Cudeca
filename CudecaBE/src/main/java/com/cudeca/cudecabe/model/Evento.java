@@ -9,6 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -48,5 +49,9 @@ public class Evento {
     @ColumnDefault("0")
     @Column(name = "total_recaudado", precision = 10, scale = 2)
     private BigDecimal totalRecaudado;
+
+    // Relación con CompraEvento (un evento puede tener múltiples compras)
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompraEvento> comprasEventos;
 
 }

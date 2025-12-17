@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import OAuth2Redirect from './pages/OAuth2Redirect';
 import CompleteProfile from './pages/CompleteProfile';
 import Donar from './pages/Donar';
+import MisEntradas from './pages/MisEntradas';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/hazte-socio" element={<HazteSocio />} />
                 <Route path="/carrito" element={<Carrito />} />
                 <Route path="/perfil" element={<Perfil />} />
+                <Route path="/mis-entradas" element={<MisEntradas />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
                 <Route path="/complete-profile" element={<CompleteProfile />} />

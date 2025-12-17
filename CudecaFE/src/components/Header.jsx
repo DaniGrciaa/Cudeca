@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Ticket } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -59,24 +59,35 @@ const Header = () => {
               </Link>
             ))}
             
+            {/* Mis Entradas (solo para usuarios autenticados) */}
+            {isAuthenticated && (
+              <Link
+                to="/mis-entradas"
+                className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-cudeca-darkGreen transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded px-3 py-2"
+              >
+                <Ticket className="w-5 h-5" aria-hidden="true" />
+                Mis Entradas
+              </Link>
+            )}
+            
             {/* Profile / Login */}
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Link
                   to="/perfil"
-                  className="flex items-center gap-2 p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100"
+                  className="group flex items-center gap-2 p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100 cursor-pointer"
                   aria-label="Mi Perfil"
                 >
-                  <User className="w-6 h-6 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
-                  <span className="text-sm font-medium text-gray-700">{user?.nombre?.split(' ')[0]}</span>
+                  <User className="w-6 h-6 text-gray-700 group-hover:text-cudeca-darkGreen transition-colors pointer-events-none" aria-hidden="true" />
+                  <span className="text-sm font-medium text-gray-700 pointer-events-none">{user?.nombre?.split(' ')[0]}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100"
+                  className="group p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg hover:bg-gray-100 cursor-pointer"
                   aria-label="Cerrar sesión"
                   title="Cerrar sesión"
                 >
-                  <LogOut className="w-6 h-6 text-gray-700 hover:text-red-600 transition-colors" aria-hidden="true" />
+                  <LogOut className="w-6 h-6 text-gray-700 group-hover:text-red-600 transition-colors pointer-events-none" aria-hidden="true" />
                 </button>
               </div>
             ) : (
@@ -92,10 +103,10 @@ const Header = () => {
             {/* Cart Icon */}
             <Link
               to="/carrito"
-              className="relative p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg"
+              className="group relative p-2 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg cursor-pointer"
               aria-label={`Carrito de compras - ${itemCount} artículos`}
             >
-              <ShoppingCart className="w-7 h-7 text-gray-700 hover:text-cudeca-darkGreen transition-colors" aria-hidden="true" />
+              <ShoppingCart className="w-7 h-7 text-gray-700 group-hover:text-cudeca-darkGreen transition-colors pointer-events-none" aria-hidden="true" />
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-cudeca-yellow text-gray-900 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center" aria-live="polite">
                   {itemCount}
@@ -139,6 +150,16 @@ const Header = () => {
                     {item.name}
                   </Link>
                 ))}
+                {isAuthenticated && (
+                  <Link
+                    to="/mis-entradas"
+                    className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-cudeca-darkGreen hover:bg-gray-50 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Ticket className="w-5 h-5" aria-hidden="true" />
+                    Mis Entradas
+                  </Link>
+                )}
                 <Link
                   to="/perfil"
                   className="text-lg font-medium text-gray-700 hover:text-cudeca-darkGreen hover:bg-gray-50 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-cudeca-yellow"
