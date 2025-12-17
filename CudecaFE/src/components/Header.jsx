@@ -36,15 +36,15 @@ const Header = () => {
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-3 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg p-2"
+            className="flex items-center space-x-3 focus:outline-none focus:ring-4 focus:ring-cudeca-yellow rounded-lg p-2 cursor-pointer"
             aria-label="Cudeca Eventos - Ir a inicio"
           >
             <img 
               src={cudecaLogo} 
               alt="Cudeca Logo" 
-              className="h-12 w-auto object-contain"
+              className="h-12 w-auto object-contain pointer-events-none"
             />
-            <span className="text-2xl font-bold text-gray-900">Cudeca Eventos</span>
+            <span className="text-2xl font-bold text-gray-900 pointer-events-none">Cudeca Eventos</span>
           </Link>
 
           {/* Desktop Navigation */}
